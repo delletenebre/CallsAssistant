@@ -125,8 +125,8 @@ public class DebugFragment extends Fragment {
                 try {
                     event = data.getString("event");
 
-                    String contactName = new String(data.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                    String message = new String(data.getString("message").getBytes("ISO-8859-1"), "UTF-8");
+                    String contactName = data.getString("name");
+                    String message = data.getString("message");
 
                     NotyOverlay noty = NotyOverlay.create(
                             "00:00:00:00", data.getString("number"), event);

@@ -1,17 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Calls Assistant</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
     <string name="private_number">Private Number</string>
 
-
     <string name="tab_permissions">Permissions</string>
 
     <string name="pref_bt_device_no_device">No device</string>
     <string name="pref_bt_device_template" translatable="false">%1$s [ %2$s ]</string>
-
-
-
 
     <!-- Debug Fragment -->
     <string name="tab_debug">Debug</string>
@@ -28,11 +25,6 @@
     <string-array name="spinner_array_event" translatable="false">
         <item>call</item>
         <item>sms</item>
-    </string-array>
-
-    <string-array name="spinner_array_type" translatable="false">
-        <item>incoming</item>
-        <item>outgoing</item>
     </string-array>
 
     <string-array name="spinner_array_state" translatable="false">
@@ -53,7 +45,6 @@
     <string name="perm_draw_overlays">Draw Overlays</string>
     <string name="perm_read_contacts">Read Contacts</string>
     <string name="perm_call_phone">Call Phone</string>
-    <string name="perm_receive_sms">Receive SMS</string>
     <string name="perm_send_sms">Send SMS</string>
     <string name="perm_gps">GPS</string>
     <!-- ___________ ________ -->
@@ -67,40 +58,35 @@
     <string name="incoming_sms">Incoming SMS</string>
     <string name="incoming_message">Incoming message</string>
 
+    <string name="button_text_call_dismiss">Dismiss</string>
+    <string name="button_text_call_answer">Answer</string>
     <string name="button_text_sms" translatable="false">SMS #%1$d</string>
     <string name="button_text_gps" translatable="false">GPS</string>
     <!-- ____________ -->
 
 
     <!-- Strings related to Settings -->
-    <string name="pref_header_general">General</string>
     <string name="pref_header_notification">Notification</string>
     <string name="pref_header_messages">Messages</string>
 
 
     <string name="pref_title_bluetooth_device">Bluetooth device</string>
 
-    <string name="pref_title_noty_enabled">Enable notification</string>
     <string name="pref_title_noty_show_calls">Show for Calls</string>
     <string name="pref_title_noty_show_sms">Show for SMS</string>
 
-    <string name="pref_title_normal_size">\"Magic\" size (dp)</string>
+    <string name="pref_title_normal_size">UI size (dp)</string>
     <string name="pref_default_normal_size" translatable="false">20</string>
 
     <string name="pref_title_noty_width">Width (%)</string>
     <string name="pref_default_noty_width" translatable="false">66</string>
 
 
-    <string name="pref_default_message">I\'m driving</string>
+    <string name="pref_default_message">I\'m driving. I\'ll call you later.</string>
 
     <string name="pref_title_show_button">Show button</string>
     <string name="pref_title_message">Message</string>
 
-    <string name="pref_title_send_gps_coordinates">GPS data</string>
-    <string name="pref_summary_send_gps_coordinates">Send GPS-coordinates with response</string>
     <string name="pref_title_message_gps">Message (before link)</string>
-    <string name="pref_default_message_gps">I\'m here</string>
-
-
-
+    <string name="pref_default_message_gps">I\'m on my way:</string>
 </resources>

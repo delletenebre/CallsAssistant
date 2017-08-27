@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_settings">Настройки</string>
+    <string name="title_activity_settings">Настройки</string>
+    <string name="private_number">Номер скрыт</string>
+
+    <string name="tab_permissions">Разрешения</string>
+
+    <string name="pref_bt_device_no_device">Нет устройства</string>
+
+    <!-- Debug Fragment -->
+    <string name="tab_debug">отладка</string>
+
+    <string name="event">Событие</string>
+    <string name="state">Состояние</string>
+    <string name="phone_number">Номер абонента</string>
+    <string name="find_contact">Нажмите для поиска контакта</string>
+    <string name="message_text">Тескт сообщения</string>
+    <string name="debug_send_data">Отправить отладочные данные</string>
+    <string name="debug_show_notification">Отобразить уведомление</string>
+    <string name="warning_enter_phone_number">Пожалуйста, введите номер абонента</string>
+    <!-- _____ ________ -->
+
+
+
+    <!-- Permissions Fragment -->
+    <string name="perm_denied">\tотказано</string>
+    <string name="perm_allow">\tразрешено</string>
+    <string name="perm_request">запросить</string>
+
+    <string name="perm_draw_overlays">Уведомления</string>
+    <string name="perm_read_contacts">Контакты</string>
+    <string name="perm_call_phone">Звонки</string>
+    <string name="perm_send_sms">Отправка SMS</string>
+    <string name="perm_gps">Местоположение</string>
+    <!-- ___________ ________ -->
+
+
+
+    <!-- Notification -->
+    <string name="incoming_call">Входящий звонок</string>
+    <string name="incoming_sms">Входящее SMS</string>
+    <string name="incoming_message">Входящее сообщение</string>
+
+    <string name="button_text_call_dismiss">Отклонить</string>
+    <string name="button_text_call_answer">Ответить</string>
+    <!-- ____________ -->
+
+
+    <!-- Strings related to Settings -->
+    <string name="pref_header_notification">Уведомление</string>
+    <string name="pref_header_messages">Сообщения</string>
+
+
+    <string name="pref_title_bluetooth_device">Bluetooth-устройство</string>
+
+    <string name="pref_title_noty_show_calls">Отображать для звонков</string>
+    <string name="pref_title_noty_show_sms">Отображать для SMS</string>
+
+    <string name="pref_title_normal_size">Размер элементов (dp)</string>
+
+    <string name="pref_title_noty_width">Ширина уведомления (%)</string>
+
+
+    <string name="pref_default_message">Я за рулём, перезвоню позже.</string>
+
+    <string name="pref_title_show_button">Отображать кнопку</string>
+    <string name="pref_title_message">Сообщение</string>
+
+    <string name="pref_title_message_gps">Сообщение</string>
+    <string name="pref_default_message_gps">Я в пути:</string>
+</resources>

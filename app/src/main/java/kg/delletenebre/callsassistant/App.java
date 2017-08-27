@@ -86,7 +86,7 @@ public class App extends Application {
                         String number = data.getString("number");
                         String action = data.getString("action");
                         String extra = data.getString("extra");
-                        String message = "";
+                        String message;
 
                         switch (action) {
                             case "cd"://Call Dismiss
@@ -364,26 +364,23 @@ public class App extends Application {
         return bestLocation;
     }
     public String getLocationString() {
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuilder = new StringBuilder();
         Location location = getLastKnownLocation();
         if (location != null) {
-            stringBuffer.append(location.getLatitude());
-            stringBuffer.append(",");
-            stringBuffer.append(location.getLongitude());
+            stringBuilder.append(location.getLatitude());
+            stringBuilder.append(",");
+            stringBuilder.append(location.getLongitude());
         }
-        return stringBuffer.toString();
+        return stringBuilder.toString();
     }
     public String getLocationSMS(String prefixText, String coordinates) {
-        StringBuffer smsBody = new StringBuffer();
-        smsBody.append(prefixText);
-        smsBody.append("\r\n");
-        smsBody.append("http://maps.google.com/?q=");
-        smsBody.append(coordinates);
         //http://maps.google.com?q=25,25
 
-        return smsBody.toString();
+        return prefixText +
+                "\r\n" +
+                "http://maps.google.com/?q=" +
+                coordinates;
     }
-
 
 
 

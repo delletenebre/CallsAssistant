@@ -1,18 +1,17 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <SwitchPreference android:key="noty_enabled"
-        android:title="@string/pref_title_noty_enabled"
-        android:defaultValue="true" />
+    <kg.delletenebre.callsassistant.BluetoothDevicesListPreference
+        android:key="bluetooth_device"
+        android:defaultValue=""
+        android:title="@string/pref_title_bluetooth_device" />
 
     <SwitchPreference android:key="noty_show_calls"
         android:title="@string/pref_title_noty_show_calls"
-        android:defaultValue="true"
-        android:dependency="noty_enabled" />
+        android:defaultValue="true" />
 
     <SwitchPreference android:key="noty_show_sms"
         android:title="@string/pref_title_noty_show_sms"
-        android:defaultValue="true"
-        android:dependency="noty_enabled" />
+        android:defaultValue="true" />
 
     <PreferenceCategory
         android:title="Style">

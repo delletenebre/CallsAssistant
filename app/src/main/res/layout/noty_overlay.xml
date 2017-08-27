@@ -43,8 +43,8 @@
                         android:id="@+id/header_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Входящее сообщение"
-                        android:textSize="14dp"
+                        android:text="@string/incoming_message"
+                        android:textSize="14sp"
                         android:maxLines="1"
                         android:ellipsize="end" />
 
@@ -117,7 +117,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:backgroundTint="#F44336"
-                        android:text="Dismiss" />
+                        android:text="@string/button_text_call_dismiss" />
 
                     <android.support.v7.widget.AppCompatButton
                         android:id="@+id/call_answer"
@@ -126,7 +126,7 @@
                         android:layout_height="wrap_content"
                         app:backgroundTint="#4CAF50"
 
-                        android:text="Answer" />
+                        android:text="@string/button_text_call_answer" />
 
                 </LinearLayout>
 

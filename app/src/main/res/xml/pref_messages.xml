@@ -58,12 +58,6 @@
             android:defaultValue="true"
             android:title="@string/pref_title_show_button" />
 
-        <CheckBoxPreference android:key="send_gps_coordinates"
-            android:defaultValue="true"
-            android:title="@string/pref_title_send_gps_coordinates"
-            android:summary="@string/pref_summary_send_gps_coordinates"
-            android:dependency="gps" />
-
         <EditTextPreference android:key="message_gps"
             android:title="@string/pref_title_message_gps"
             android:defaultValue="@string/pref_default_message_gps"
