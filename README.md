@@ -2,7 +2,7 @@
 
 Приложение для отображения уведомления о звонках и СМС поступающих на телефон на экране планшета.
 
-<img src="https://github.com/delletenebre/CallsAssistant/raw/master/apk/screenshots/phone-call.png" height="480"> <img src="https://github.com/delletenebre/CallsAssistant/raw/master/apk/screenshots/tablet-call-notification.png" height="480">
+<img src="https://github.com/delletenebre/CallsAssistant/raw/master/apk/screenshots/phone-call.png" height="320"> <img src="https://github.com/delletenebre/CallsAssistant/raw/master/apk/screenshots/tablet-call-notification.png" height="320">
 
 ## Возможности
 * Подключение:
