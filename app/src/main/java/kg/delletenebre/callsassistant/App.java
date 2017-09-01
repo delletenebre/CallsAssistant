@@ -517,7 +517,7 @@ public class App extends Application {
         return stringBuilder.toString();
     }
     public String getLocationSMS(String prefixText, String coordinates) {
-        //http://maps.google.com?q=25,25
+        //https://maps.google.com?q=25,25
 
         return prefixText +
                 "\r\n" +
