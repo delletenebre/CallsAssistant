@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -43,10 +44,11 @@ public class App extends Application {
         return sSelf;
     }
 
-    private static final String ACTION_CALL_ANSWER = "kg.calls.assistant.call.answer";
-    private static final String ACTION_CALL_DISMISS = "kg.calls.assistant.call.dismiss";
-    private static final String ACTION_SMS = "kg.calls.assistant.sms";
-    private static final String ACTION_GPS = "kg.calls.assistant.gps";
+    protected static final String ACTION_CALL_ANSWER = "kg.calls.assistant.call.answer";
+    protected static final String ACTION_CALL_DISMISS = "kg.calls.assistant.call.dismiss";
+    protected static final String ACTION_EVENT = "kg.calls.assistant.event";
+    protected static final String ACTION_SMS = "kg.calls.assistant.sms";
+    protected static final String ACTION_GPS = "kg.calls.assistant.gps";
 
     private SharedPreferences mPrefs;
     private BluetoothService mBluetoothService;
@@ -70,70 +72,57 @@ public class App extends Application {
         mLocationManager = (LocationManager)
                 getSystemService(Context.LOCATION_SERVICE);
 
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_CALL_ANSWER);
+        filter.addAction(ACTION_CALL_DISMISS);
+        filter.addAction(ACTION_SMS);
+        filter.addAction(ACTION_GPS);
+        filter.addAction(ACTION_EVENT);
+        filter.setPriority(999);
+        registerReceiver(new EventsReceiver(), filter);
+
         mBluetoothService = new BluetoothService();
         mBluetoothService.setOnDataReceivedListener(new BluetoothService.OnDataReceivedListener() {
             @Override
             public void onDataReceived(String btMessage, String deviceAddress) {
-                final Context context = getApplicationContext();
-
                 Debug.log("receive: " + btMessage);
-
                 try {
-                    final JSONObject data = new JSONObject(btMessage);
-                    final String event = data.getString("event");
+                    JSONObject data = new JSONObject(btMessage);
+                    String event = data.getString("event");
+                    String number = data.getString("number");
 
                     if (event.equals("response")) {
-                        String number = data.getString("number");
                         String action = data.getString("action");
-                        String extra = data.getString("extra");
-                        String message;
-
                         switch (action) {
-                            case "cd"://Call Dismiss
+                            case "cd": // Call Dismiss
                                 sendBroadcast(new Intent(ACTION_CALL_DISMISS));
-                                endCall();
                                 break;
-
-                            case "ca"://Call Answer
-                                // no "legal" way
+                            case "ca": // Call Answer
                                 sendBroadcast(new Intent(ACTION_CALL_ANSWER));
                                 break;
-
                             case "s1":
                             case "s2":
                             case "s3":
                                 String smsButtonNumber = action.substring(1);
-
                                 Intent smsIntent = new Intent(ACTION_SMS);
+                                smsIntent.putExtra("phoneNumber", number);
                                 smsIntent.putExtra("buttonNumber", smsButtonNumber);
                                 sendBroadcast(smsIntent);
-
-                                endCall();
-                                message = getPrefs().getString("message_sms_" + smsButtonNumber,
-                                        getString(R.string.pref_default_message));
-                                sendSMS(number, message);
                                 break;
-
                             case "gps":
-                                sendBroadcast(new Intent(ACTION_GPS));
-                                endCall();
-
-                                message = getLocationSMS(getPrefs().getString("message_gps",
-                                        getString(R.string.pref_default_message_gps)), extra);
-                                sendSMS(number, message);
+                                Intent gpsIntent = new Intent(ACTION_GPS);
+                                gpsIntent.putExtra("phoneNumber", number);
+                                gpsIntent.putExtra("coordinates", data.getString("extra"));
+                                sendBroadcast(gpsIntent);
                                 break;
                         }
-
                     } else {
-                        Debug.log("Command received");
-
-                        final String contactName = new String(data.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                        final String message = new String(data.getString("message").getBytes("ISO-8859-1"), "UTF-8");
-                        final String type = data.getString("type");
-                        final String number = data.getString("number");
-                        final String contactPhoto = data.getString("photo");
-                        final String state = data.getString("state");
-                        final String buttons = data.getString("buttons");
+                        String contactName = new String(data.getString("name").getBytes("ISO-8859-1"), "UTF-8");
+                        String message = new String(data.getString("message").getBytes("ISO-8859-1"), "UTF-8");
+                        String type = data.getString("type");
+                        String contactPhoto = data.getString("photo");
+                        String state = data.getString("state");
+                        String buttons = data.getString("buttons");
 
                         Debug.log("======== Received data ========");
                         Debug.log("RECEIVED event: " + event);
@@ -143,18 +132,108 @@ public class App extends Application {
                         Debug.log("RECEIVED name: " + contactName);
                         Debug.log("RECEIVED photo: " + contactPhoto);
                         Debug.log("RECEIVED message: " + message);
+                        Debug.log("RECEIVED deviceAddress: " + deviceAddress);
                         Debug.log("======== ======== ==== ========");
 
-                        NotyOverlay noty = NotyOverlay.create(deviceAddress, number, event);
-                        if (state.equals("idle") || state.equals("missed")) {
-                            noty.close();
-                        } else {
-                            noty.show(type, state, contactName, contactPhoto, message, buttons);
-                        }
+                        Intent intent = new Intent(ACTION_EVENT);
+                        intent.putExtra("event", event);
+                        intent.putExtra("type", type);
+                        intent.putExtra("number", number);
+                        intent.putExtra("state", state);
+                        intent.putExtra("name", contactName);
+                        intent.putExtra("photo", contactPhoto);
+                        intent.putExtra("message", message);
+                        intent.putExtra("buttons", buttons);
+                        intent.putExtra("deviceAddress", deviceAddress);
+                        sendBroadcast(intent);
                     }
                 } catch (Exception e) {
-                    Debug.error(e.getLocalizedMessage());
+                    e.printStackTrace();
                 }
+
+
+
+
+//                try {
+//                    final JSONObject data = new JSONObject(btMessage);
+//                    final String event = data.getString("event");
+//
+//                    if (event.equals("response")) {
+//                        String number = data.getString("number");
+//                        String action = data.getString("action");
+//                        String extra = data.getString("extra");
+//                        String message;
+//
+//                        switch (action) {
+//                            case "cd": // Call Dismiss
+//                                sendBroadcast(new Intent(ACTION_CALL_DISMISS));
+//                                endCall();
+//                                break;
+//
+//                            case "ca": // Call Answer
+//                                // no "legal" way to answer programmatically
+//                                sendBroadcast(new Intent(ACTION_CALL_ANSWER));
+//                                break;
+//
+//                            case "s1":
+//                            case "s2":
+//                            case "s3":
+//                                String smsButtonNumber = action.substring(1);
+//
+//                                Intent smsIntent = new Intent(ACTION_SMS);
+//                                smsIntent.putExtra("buttonNumber", smsButtonNumber);
+//                                sendBroadcast(smsIntent);
+//
+//                                endCall();
+//                                message = getPrefs().getString("message_sms_" + smsButtonNumber,
+//                                        getString(R.string.pref_default_message));
+//                                sendSMS(number, message);
+//                                break;
+//
+//                            case "gps":
+//                                sendBroadcast(new Intent(ACTION_GPS));
+//                                endCall();
+//
+//                                message = getLocationSMS(getPrefs().getString("message_gps",
+//                                        getString(R.string.pref_default_message_gps)), extra);
+//                                sendSMS(number, message);
+//                                break;
+//                        }
+//
+//                    } else {
+//                        Debug.log("Command received");
+//
+//                        final String contactName = new String(data.getString("name").getBytes("ISO-8859-1"), "UTF-8");
+//                        final String message = new String(data.getString("message").getBytes("ISO-8859-1"), "UTF-8");
+//                        final String type = data.getString("type");
+//                        final String number = data.getString("number");
+//                        final String contactPhoto = data.getString("photo");
+//                        final String state = data.getString("state");
+//                        final String buttons = data.getString("buttons");
+//
+//                        Debug.log("======== Received data ========");
+//                        Debug.log("RECEIVED event: " + event);
+//                        Debug.log("RECEIVED type: " + type);
+//                        Debug.log("RECEIVED number: " + number);
+//                        Debug.log("RECEIVED state: " + state);
+//                        Debug.log("RECEIVED name: " + contactName);
+//                        Debug.log("RECEIVED photo: " + contactPhoto);
+//                        Debug.log("RECEIVED message: " + message);
+//                        Debug.log("======== ======== ==== ========");
+//
+//                        if ((event.equals("sms") && mPrefs.getBoolean("noty_show_sms", true))
+//                                || (event.equals("call") && mPrefs.getBoolean("noty_show_calls", true))) {
+//                            NotyOverlay noty = NotyOverlay.create(deviceAddress, number, event);
+//                            if (state.equals("idle") || state.equals("missed")) {
+//                                noty.close();
+//                            } else {
+//                                noty.show(type, state, contactName, contactPhoto, message, buttons);
+//                            }
+//                        }
+//                    }
+//                } catch (Exception e) {
+//                    Debug.error(e.getLocalizedMessage());
+//                }
 
                 restartBluetoothCommunication();
             }
@@ -316,6 +395,70 @@ public class App extends Application {
         return contact;
     }
 
+    public Map<String,String> getContactInfo(Cursor cursor) {
+        Map<String,String> contact = new HashMap<>();
+        contact.put("name", getString(R.string.private_number));
+        contact.put("photo", "");
+
+        if (!PermissionsActivity.testPermission(Manifest.permission.READ_CONTACTS)) {
+            return contact;
+        }
+
+        try {
+            ContentResolver contentResolver = getContentResolver();
+            if (cursor == null) {
+                return contact;
+            }
+
+            if (cursor.moveToFirst()) {
+                String name = cursor.getString(
+                        cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+                contact.put("name", name);
+
+                long contactId = cursor.getLong(
+                        cursor.getColumnIndex(ContactsContract.Contacts.Photo._ID));
+
+                Bitmap contactBitmap = retrieveContactPhoto(contentResolver, contactId);
+                if (contactBitmap != null) {
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    contactBitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                    byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+                    contact.put("photo", Base64.encodeToString(byteArray, Base64.DEFAULT));
+                }
+
+                String hasPhone = cursor.getString(cursor.getColumnIndex(
+                        ContactsContract.Contacts.HAS_PHONE_NUMBER));
+
+                // если есть телефоны, получаем и выводим их
+                if (hasPhone.equalsIgnoreCase("1")) {
+                    Cursor phones = getContentResolver().query(
+                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                            null,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId,
+                            null,
+                            null);
+
+                    if (phones != null) {
+                        phones.moveToNext();
+                        contact.put("number", phones.getString(phones.getColumnIndex(
+                                ContactsContract.CommonDataKinds.Phone.NUMBER)));
+                        phones.close();
+                    }
+                }
+            }
+
+            if (!cursor.isClosed()) {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            Debug.error(e.getLocalizedMessage());
+        }
+
+        return contact;
+    }
+
 
     private Bitmap retrieveContactPhoto(ContentResolver contentResolver, long contactID) {
         Bitmap photo = null;
@@ -378,7 +521,7 @@ public class App extends Application {
 
         return prefixText +
                 "\r\n" +
-                "http://maps.google.com/?q=" +
+                "https://maps.google.com/?q=" +
                 coordinates;
     }
 
@@ -393,7 +536,7 @@ public class App extends Application {
         ITelephony telephonyService = (ITelephony) m.invoke(tm);
         telephonyService.endCall();
     }
-    private void endCall() {
+    public void endCall() {
         if (PermissionsActivity.testPermission(Manifest.permission.CALL_PHONE)) {
             try {
                 endCallAidl(getApplicationContext());

@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
     defaultConfig {
         applicationId "kg.delletenebre.callsassistant"
         minSdkVersion 14
-        targetSdkVersion 25
-        versionCode 2
+        targetSdkVersion 26
+        versionCode 4
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
     }
@@ -22,7 +22,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    ext.supportLibsVersion = "25.3.1"
+    ext.supportLibsVersion = "26.0.1"
     compile "com.android.support:appcompat-v7:$supportLibsVersion"
     compile "com.android.support:design:$supportLibsVersion"
     compile "com.android.support:support-v4:$supportLibsVersion"
@@ -30,9 +30,7 @@ dependencies {
     compile "com.android.support:gridlayout-v7:$supportLibsVersion"
     compile "com.android.support:cardview-v7:$supportLibsVersion"
     compile 'de.hdodenhof:circleimageview:2.1.0'
-    compile 'com.pavelsikun:material-seekbar-preference:2.3.0'
-    compile 'com.instabug.library:instabug:4.2.9'
-    compile 'com.github.douglasjunior.AndroidBluetoothLibrary:BluetoothClassicLibrary:0.3.3'
+    compile 'com.instabug.library:instabug:4.2.10'
 }
 
 

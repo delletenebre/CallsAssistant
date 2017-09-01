@@ -9,8 +9,6 @@ import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -145,22 +143,22 @@ class NotyOverlay {
             int buttonHeight = calcDisplayPoints(displayMetrics, normalSize * 3);
 
             View vwStatusBarHelper = mNotificationLayout.findViewById(R.id.status_bar_helper);
-            RelativeLayout ltRoot = (RelativeLayout) mNotificationLayout.findViewById(R.id.root_layout);
+            RelativeLayout ltRoot = mNotificationLayout.findViewById(R.id.root_layout);
             //LinearLayout ltNotification = (LinearLayout) mNotificationLayout.findViewById(R.id.notification_layout);
-            CardView ltNotification = (CardView) mNotificationLayout.findViewById(R.id.notification_layout);
-            RelativeLayout ltHeader = (RelativeLayout) mNotificationLayout.findViewById(R.id.header_layout);
-            TextView vwHeaderTitle = (TextView) mNotificationLayout.findViewById(R.id.header_title);
-            ImageView vwHeaderIcon = (ImageView) mNotificationLayout.findViewById(R.id.header_icon);
-            LinearLayout ltContact = (LinearLayout) mNotificationLayout.findViewById(R.id.contact_layout);
-            ImageView vwContactPhoto = (ImageView) mNotificationLayout.findViewById(R.id.contact_photo);
-            TextView vwContactName = (TextView) mNotificationLayout.findViewById(R.id.contact_name);
-            TextView vwContactExtra = (TextView) mNotificationLayout.findViewById(R.id.contact_extra);
+            CardView ltNotification = mNotificationLayout.findViewById(R.id.notification_layout);
+            RelativeLayout ltHeader = mNotificationLayout.findViewById(R.id.header_layout);
+            TextView vwHeaderTitle = mNotificationLayout.findViewById(R.id.header_title);
+            ImageView vwHeaderIcon = mNotificationLayout.findViewById(R.id.header_icon);
+            LinearLayout ltContact = mNotificationLayout.findViewById(R.id.contact_layout);
+            ImageView vwContactPhoto = mNotificationLayout.findViewById(R.id.contact_photo);
+            TextView vwContactName = mNotificationLayout.findViewById(R.id.contact_name);
+            TextView vwContactExtra = mNotificationLayout.findViewById(R.id.contact_extra);
 
-            LinearLayout ltCallResponse = (LinearLayout) mNotificationLayout.findViewById(R.id.call_response_layout);
-            AppCompatButton btnCallDismiss = (AppCompatButton) mNotificationLayout.findViewById(R.id.call_dismiss);
-            AppCompatButton btnCallAnswer = (AppCompatButton) mNotificationLayout.findViewById(R.id.call_answer);
+            LinearLayout ltCallResponse = mNotificationLayout.findViewById(R.id.call_response_layout);
+            AppCompatButton btnCallDismiss = mNotificationLayout.findViewById(R.id.call_dismiss);
+            AppCompatButton btnCallAnswer = mNotificationLayout.findViewById(R.id.call_answer);
 
-            final GridLayout ltResponseButtons = (GridLayout) mNotificationLayout.findViewById(R.id.response_buttons_layout);
+            final GridLayout ltResponseButtons = mNotificationLayout.findViewById(R.id.response_buttons_layout);
 
             vwStatusBarHelper.getLayoutParams().height = getStatusBarHeight(mContext.getResources());
 
@@ -271,7 +269,7 @@ class NotyOverlay {
 
                 int icon = R.drawable.ic_mail_outline_black;
                 if (buttonName.equals("gps")) {
-                    icon = R.drawable.ic_whatsapp_black;// TODO CHANGE To map marker
+                    icon = R.drawable.ic_my_location_black_24dp;
                 }
                 setButtonStyle(responseButton, normalSize, buttonHeight, icon);
             }

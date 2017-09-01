@@ -14,7 +14,7 @@
         android:defaultValue="true" />
 
     <PreferenceCategory
-        android:title="Style">
+        android:title="@string/pref_category_style">
 
         <EditTextPreference android:key="normal_size"
             android:defaultValue="@string/pref_default_normal_size"

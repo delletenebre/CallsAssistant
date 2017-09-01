@@ -1,7 +1,6 @@
 package kg.delletenebre.callsassistant;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,7 +24,7 @@ public class EventsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        final App app = App.getInstance();
+        final App fApp = App.getInstance();
 
         String action = intent.getAction();
 
@@ -83,11 +82,11 @@ public class EventsReceiver extends BroadcastReceiver {
                 }
                 sCallLastState = callState;
 
-                if (infoType.equals("incoming")) {
-                    final JSONObject info = app.createJsonData(infoEvent, infoType, infoState,
+                if (fApp.getPrefs().getBoolean("noty_show_calls", true)) {
+                    JSONObject callData = fApp.createJsonData(infoEvent, infoType, infoState,
                             infoPhoneNumber, infoMessage);
-                    app.connectAndSend(info.toString());
-                    Debug.info("JSON data (call): " + info.toString());
+                    fApp.connectAndSend(callData.toString());
+                    Debug.info("JSON data (call): " + callData.toString());
                 }
 
                 break;
@@ -121,12 +120,13 @@ public class EventsReceiver extends BroadcastReceiver {
                         }
                     }
                 }
-                JSONObject info = app.createJsonData(infoEvent, infoType, infoState,
-                        infoPhoneNumber, infoMessage);
-                app.connectAndSend(info.toString());
 
-                Debug.info("JSON SMS: " + info.toString());
-
+                if (fApp.getPrefs().getBoolean("noty_show_sms", true)) {
+                    JSONObject smsData = fApp.createJsonData(infoEvent, infoType, infoState,
+                            infoPhoneNumber, infoMessage);
+                    fApp.connectAndSend(smsData.toString());
+                    Debug.info("JSON SMS: " + smsData.toString());
+                }
                 break;
             case BluetoothAdapter.ACTION_STATE_CHANGED:
                 Debug.log("**** BluetoothAdapter.ACTION_STATE_CHANGED ****");
@@ -141,7 +141,52 @@ public class EventsReceiver extends BroadcastReceiver {
                         App.getInstance().stopBluetoothCommunication();
                         break;
                 }
+                break;
+            case App.ACTION_CALL_DISMISS:
+                Debug.log("**** ACTION_CALL_DISMISS ****");
+                fApp.endCall();
+                break;
+            case App.ACTION_CALL_ANSWER:
+                Debug.log("**** ACTION_CALL_ANSWER ****");
+                Debug.log("No \"legal\" way to call answer programmatically");
+                break;
+            case App.ACTION_SMS:
+                Debug.log("**** ACTION_SMS ****");
+                fApp.endCall();
+                String smsMessage = fApp.getPrefs().getString("message_sms_" + intent.getStringExtra("buttonNumber"),
+                        context.getString(R.string.pref_default_message));
+                fApp.sendSMS(intent.getStringExtra("phoneNumber"), smsMessage);
+                break;
+            case App.ACTION_GPS:
+                Debug.log("**** ACTION_GPS ****");
+                fApp.endCall();
+                String gpsMessage = fApp.getLocationSMS(fApp.getPrefs().getString("message_gps",
+                        fApp.getString(R.string.pref_default_message_gps)), intent.getStringExtra("coordinates"));
+                Debug.log(intent.getStringExtra("phoneNumber"));
+                Debug.log(gpsMessage);
+                fApp.sendSMS(intent.getStringExtra("phoneNumber"), gpsMessage);
+                break;
+            case App.ACTION_EVENT:
+                Debug.log("**** ACTION_EVENT ****");
+                String event = intent.getStringExtra("event");
+                String eventState = intent.getStringExtra("state");
 
+                if ((event.equals("sms") && fApp.getPrefs().getBoolean("noty_show_sms", true))
+                        || (event.equals("call") && fApp.getPrefs().getBoolean("noty_show_calls", true))) {
+                    NotyOverlay noty = NotyOverlay.create(intent.getStringExtra("deviceAddress"),
+                            intent.getStringExtra("number"),
+                            event);
+                    if (eventState.equals("idle") || eventState.equals("missed")) {
+                        noty.close();
+                    } else {
+                        noty.show(intent.getStringExtra("type"),
+                                eventState,
+                                intent.getStringExtra("name"),
+                                intent.getStringExtra("photo"),
+                                intent.getStringExtra("message"),
+                                intent.getStringExtra("buttons"));
+                    }
+                }
                 break;
         }
     }

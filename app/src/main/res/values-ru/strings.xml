@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_settings">Настройки</string>
+    <string name="send_report">Сообщить о проблеме</string>
     <string name="title_activity_settings">Настройки</string>
     <string name="private_number">Номер скрыт</string>
 
@@ -50,23 +51,15 @@
     <!-- Strings related to Settings -->
     <string name="pref_header_notification">Уведомление</string>
     <string name="pref_header_messages">Сообщения</string>
-
-
+    <string name="pref_category_style">Стиль</string>
     <string name="pref_title_bluetooth_device">Bluetooth-устройство</string>
-
     <string name="pref_title_noty_show_calls">Отображать для звонков</string>
     <string name="pref_title_noty_show_sms">Отображать для SMS</string>
-
     <string name="pref_title_normal_size">Размер элементов (dp)</string>
-
     <string name="pref_title_noty_width">Ширина уведомления (%)</string>
-
-
     <string name="pref_default_message">Я за рулём, перезвоню позже.</string>
-
     <string name="pref_title_show_button">Отображать кнопку</string>
     <string name="pref_title_message">Сообщение</string>
-
     <string name="pref_title_message_gps">Сообщение</string>
     <string name="pref_default_message_gps">Я в пути:</string>
 </resources>
