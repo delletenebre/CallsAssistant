@@ -4,6 +4,13 @@
 
 > Под *телефоном* и *планшетом* понимаются любые android-устройства - разделение для удобства.
 
+> **Замечание** Для закрытия *уведомления* нажмите на область фотографии/номера телефона.
+
+> **Замечание** При нажатии на кнопку `Ответить` будет создан только Intent
+`kg.calls.assistant.call.answer`, т.к. "легального" программного способа ответить на звонок нет. Но
+с помощью Intent'а можно реализовать например с помощью [Tasker](https://play.google.com/store/apps/details?id=net.dinglisch.android.taskerm)
+или [Automate](https://play.google.com/store/apps/details?id=com.llamalab.automate).
+
 <img src="https://github.com/delletenebre/CallsAssistant/raw/master/apk/screenshots/phone-call.png" height="320"> <img src="https://github.com/delletenebre/CallsAssistant/raw/master/apk/screenshots/tablet-call-notification.png" height="320">
 
 ## Разрешения
@@ -24,8 +31,6 @@
 передаёт на *планшет*.
 
 При получении информации, *планшет* показывает окно поверх интерфейса системы.
-
-> **Замечание** Для закрытия *уведомления* нажмите на область фотографии/номера телефона.
 
 ### Настройка *телефона*
 У *телефона* в настройках `Уведомление` > `Bluetooth-устройство` необходимо выбрать заранее спаренное устройство *планшет*.
