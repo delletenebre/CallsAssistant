@@ -1,0 +1,38 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference android:key="connection_type"
+        android:title="@string/pref_title_connection_type"
+        android:defaultValue="@string/pref_default_connection_type"
+        android:entries="@array/pref_entries_connection_type"
+        android:entryValues="@array/pref_values_connection_type" />
+
+    <kg.delletenebre.callsassistant.BluetoothDevicesListPreference
+        android:key="bluetooth_device"
+        android:title="@string/pref_title_bluetooth_device" />
+
+    <EditTextPreference
+        android:key="web_server_host"
+        android:defaultValue="@string/pref_default_web_server_host"
+        android:title="@string/pref_title_web_server_host"
+        android:selectAllOnFocus="true"
+        android:digits="0123456789."
+        android:maxLines="1" />
+
+    <EditTextPreference
+        android:key="web_server_port"
+        android:defaultValue="@string/pref_default_web_server_port"
+        android:title="@string/pref_title_web_server_port"
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:maxLines="1" />
+
+
+    <SwitchPreference android:key="noty_show_calls"
+        android:title="@string/pref_title_noty_show_calls"
+        android:defaultValue="true" />
+
+    <SwitchPreference android:key="noty_show_sms"
+        android:title="@string/pref_title_noty_show_sms"
+        android:defaultValue="true" />
+
+</PreferenceScreen>

@@ -67,8 +67,26 @@
 
 
     <!-- Strings related to Settings -->
+    <string name="pref_title_connection_type">Connection type</string>
+    <string name="pref_default_connection_type" translatable="false">bluetooth</string>
+    <string-array name="pref_entries_connection_type" translatable="false">
+        <item>Bluetooth</item>
+        <item>WiFi</item>
+    </string-array>
+    <string-array name="pref_values_connection_type" translatable="false">
+        <item>bluetooth</item>
+        <item>http</item>
+    </string-array>
+    <string name="pref_title_web_server_port">Server port</string>
+    <string name="pref_default_web_server_port" translatable="false">8877</string>
+    <string name="pref_title_web_server_host">Server IP</string>
+    <string name="pref_default_web_server_host" translatable="false">192.168.43.250</string>
+    <string name="pref_title_device_server">This device will show notification</string>
+    <bool name="pref_default_device_server" translatable="false">false</bool>
+
     <string name="pref_header_notification">Notification</string>
     <string name="pref_header_messages">Messages</string>
+    <string name="pref_header_connection">Connection</string>
     <string name="pref_category_style">Style</string>
     <string name="pref_title_bluetooth_device">Bluetooth device</string>
     <string name="pref_title_noty_show_calls">Show for Calls</string>

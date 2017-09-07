@@ -49,8 +49,14 @@
 
 
     <!-- Strings related to Settings -->
+    <string name="pref_title_connection_type">Тип соединения</string>
+    <string name="pref_title_web_server_port">Порт сервера</string>
+    <string name="pref_title_web_server_host">IP сервера</string>
+    <string name="pref_title_device_server">Это устройство будет отображать уведомления</string>
+
     <string name="pref_header_notification">Уведомление</string>
     <string name="pref_header_messages">Сообщения</string>
+    <string name="pref_header_connection">Соединение</string>
     <string name="pref_category_style">Стиль</string>
     <string name="pref_title_bluetooth_device">Bluetooth-устройство</string>
     <string name="pref_title_noty_show_calls">Отображать для звонков</string>

@@ -2,6 +2,7 @@ package kg.delletenebre.callsassistant;
 
 import android.Manifest;
 import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -38,6 +39,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import kg.delletenebre.callsassistant.utils.Debug;
+import kg.delletenebre.callsassistant.utils.Prefs;
+
 public class App extends Application {
     private static App sSelf;
     public static App getInstance() {
@@ -49,10 +53,15 @@ public class App extends Application {
     protected static final String ACTION_EVENT = "kg.calls.assistant.event";
     protected static final String ACTION_SMS = "kg.calls.assistant.sms";
     protected static final String ACTION_GPS = "kg.calls.assistant.gps";
+    protected static final String ACTION_RESPONSE = "kg.calls.assistant.response";
+    protected static final String ACTION_SETTINGS_CHANGED = "kg.calls.assistant.settings_changed";
 
-    private SharedPreferences mPrefs;
+
+    private SharedPreferences mSharedPrefs;
+    private Prefs mPrefs;
     private BluetoothService mBluetoothService;
     private LocationManager mLocationManager;
+    private WebServer mWebServer;
 
 
     @Override
@@ -67,8 +76,8 @@ public class App extends Application {
         setTheme(R.style.AppTheme);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mPrefs = new Prefs(this);
         mLocationManager = (LocationManager)
                 getSystemService(Context.LOCATION_SERVICE);
 
@@ -78,8 +87,75 @@ public class App extends Application {
         filter.addAction(ACTION_SMS);
         filter.addAction(ACTION_GPS);
         filter.addAction(ACTION_EVENT);
+        filter.addAction(ACTION_RESPONSE);
+        filter.addAction(ACTION_SETTINGS_CHANGED);
         filter.setPriority(999);
-        registerReceiver(new EventsReceiver(), filter);
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent != null) {
+                    switch (intent.getAction()) {
+                        case ACTION_CALL_DISMISS:
+                            Debug.log("**** ACTION_CALL_DISMISS ****");
+                            endCall();
+                            break;
+                        case ACTION_CALL_ANSWER:
+                            Debug.log("**** ACTION_CALL_ANSWER ****");
+                            Debug.log("No \"legal\" way to call answer programmatically");
+                            break;
+                        case ACTION_SMS:
+                            Debug.log("**** ACTION_SMS ****");
+                            endCall();
+                            String smsMessage = getPrefs().getString("message_sms_" + intent.getStringExtra("buttonNumber"),
+                                    context.getString(R.string.pref_default_message));
+                            sendSMS(intent.getStringExtra("phoneNumber"), smsMessage);
+                            break;
+                        case ACTION_GPS:
+                            Debug.log("**** ACTION_GPS ****");
+                            endCall();
+                            String gpsMessage = getLocationSMS(getPrefs().getString("message_gps",
+                                    getString(R.string.pref_default_message_gps)), intent.getStringExtra("coordinates"));
+                            Debug.log(intent.getStringExtra("phoneNumber"));
+                            Debug.log(gpsMessage);
+                            sendSMS(intent.getStringExtra("phoneNumber"), gpsMessage);
+                            break;
+                        case ACTION_EVENT:
+                            Debug.log("**** ACTION_EVENT ****");
+                            String event = intent.getStringExtra("event");
+                            String eventState = intent.getStringExtra("state");
+
+                            if ((event.equals("sms") && getPrefs().getBoolean("noty_show_sms", true))
+                                    || (event.equals("call") && getPrefs().getBoolean("noty_show_calls", true))) {
+                                NotyOverlay noty = NotyOverlay.create(intent.getStringExtra("deviceAddress"),
+                                        intent.getStringExtra("number"),
+                                        event);
+                                if (eventState.equals("idle") || eventState.equals("missed")) {
+                                    noty.close();
+                                } else {
+                                    noty.show(intent.getStringExtra("type"),
+                                            eventState,
+                                            intent.getStringExtra("name"),
+                                            intent.getStringExtra("photo"),
+                                            intent.getStringExtra("message"),
+                                            intent.getStringExtra("buttons"));
+                                }
+                            }
+                            break;
+                        case ACTION_SETTINGS_CHANGED:
+                            Debug.log("**** ACTION_SETTINGS_CHANGED ****");
+                            if (mPrefs.getString("connection_type").equals("http")) {
+                                startWebServer();
+                            } else {
+                                stopWebServer();
+                            }
+                            break;
+                    }
+                }
+            }
+        }, filter);
+
+        mWebServer = new WebServer(this);
+        startWebServer();
 
         mBluetoothService = new BluetoothService();
         mBluetoothService.setOnDataReceivedListener(new BluetoothService.OnDataReceivedListener() {
@@ -151,90 +227,6 @@ public class App extends Application {
                     e.printStackTrace();
                 }
 
-
-
-
-//                try {
-//                    final JSONObject data = new JSONObject(btMessage);
-//                    final String event = data.getString("event");
-//
-//                    if (event.equals("response")) {
-//                        String number = data.getString("number");
-//                        String action = data.getString("action");
-//                        String extra = data.getString("extra");
-//                        String message;
-//
-//                        switch (action) {
-//                            case "cd": // Call Dismiss
-//                                sendBroadcast(new Intent(ACTION_CALL_DISMISS));
-//                                endCall();
-//                                break;
-//
-//                            case "ca": // Call Answer
-//                                // no "legal" way to answer programmatically
-//                                sendBroadcast(new Intent(ACTION_CALL_ANSWER));
-//                                break;
-//
-//                            case "s1":
-//                            case "s2":
-//                            case "s3":
-//                                String smsButtonNumber = action.substring(1);
-//
-//                                Intent smsIntent = new Intent(ACTION_SMS);
-//                                smsIntent.putExtra("buttonNumber", smsButtonNumber);
-//                                sendBroadcast(smsIntent);
-//
-//                                endCall();
-//                                message = getPrefs().getString("message_sms_" + smsButtonNumber,
-//                                        getString(R.string.pref_default_message));
-//                                sendSMS(number, message);
-//                                break;
-//
-//                            case "gps":
-//                                sendBroadcast(new Intent(ACTION_GPS));
-//                                endCall();
-//
-//                                message = getLocationSMS(getPrefs().getString("message_gps",
-//                                        getString(R.string.pref_default_message_gps)), extra);
-//                                sendSMS(number, message);
-//                                break;
-//                        }
-//
-//                    } else {
-//                        Debug.log("Command received");
-//
-//                        final String contactName = new String(data.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-//                        final String message = new String(data.getString("message").getBytes("ISO-8859-1"), "UTF-8");
-//                        final String type = data.getString("type");
-//                        final String number = data.getString("number");
-//                        final String contactPhoto = data.getString("photo");
-//                        final String state = data.getString("state");
-//                        final String buttons = data.getString("buttons");
-//
-//                        Debug.log("======== Received data ========");
-//                        Debug.log("RECEIVED event: " + event);
-//                        Debug.log("RECEIVED type: " + type);
-//                        Debug.log("RECEIVED number: " + number);
-//                        Debug.log("RECEIVED state: " + state);
-//                        Debug.log("RECEIVED name: " + contactName);
-//                        Debug.log("RECEIVED photo: " + contactPhoto);
-//                        Debug.log("RECEIVED message: " + message);
-//                        Debug.log("======== ======== ==== ========");
-//
-//                        if ((event.equals("sms") && mPrefs.getBoolean("noty_show_sms", true))
-//                                || (event.equals("call") && mPrefs.getBoolean("noty_show_calls", true))) {
-//                            NotyOverlay noty = NotyOverlay.create(deviceAddress, number, event);
-//                            if (state.equals("idle") || state.equals("missed")) {
-//                                noty.close();
-//                            } else {
-//                                noty.show(type, state, contactName, contactPhoto, message, buttons);
-//                            }
-//                        }
-//                    }
-//                } catch (Exception e) {
-//                    Debug.error(e.getLocalizedMessage());
-//                }
-
                 restartBluetoothCommunication();
             }
         });
@@ -244,7 +236,7 @@ public class App extends Application {
 
     public SharedPreferences getPrefs()
     {
-        return mPrefs;
+        return mSharedPrefs;
     }
     public void startBluetoothCommunication() {
         mBluetoothService.startWaitingConnections();
@@ -257,11 +249,18 @@ public class App extends Application {
         startBluetoothCommunication();
     }
 
-    public void connectAndSend(String address, String data) {
-        mBluetoothService.connectAndSend(address, data);
+    public void connectAndSend(String bluetoothAddress, String data) {
+        if (mPrefs.getString("connection_type").equals("bluetooth")) {
+            mBluetoothService.connectAndSend(bluetoothAddress, data);
+        }
+
+        if (mPrefs.getString("connection_type").equals("http")) {
+            mWebServer.send(data);
+        }
+
     }
     public void connectAndSend(String data) {
-        connectAndSend(mPrefs.getString("bluetooth_device", ""), data);
+        connectAndSend(mSharedPrefs.getString("bluetooth_device", ""), data);
     }
 
     public JSONObject createJsonData(String event, String type, String state,
@@ -279,6 +278,9 @@ public class App extends Application {
             info.putOpt("name", contact.get("name"));
             info.putOpt("photo", contact.get("photo"));
             info.putOpt("message", message);
+            if (mPrefs.getString("connection_type").equals("http")) {
+                info.putOpt("deviceAddress", mWebServer.getDeviceAddress());
+            }
         } catch (JSONException e) {
             Debug.error("JSON object error");
         }
@@ -293,12 +295,12 @@ public class App extends Application {
         String[] buttons = {"s1", "s2", "s3", "gps"};
         char divider = ','; // TODO CHECK TRANSLATION
 
-        if (mPrefs != null) {
+        if (mSharedPrefs != null) {
             for (int i = 0; i < buttons.length; i++) {
-                if (mPrefs.getBoolean(buttons[i], false)) {
+                if (mSharedPrefs.getBoolean(buttons[i], false)) {
                     resultBuilder.append(buttons[i]);
                     resultBuilder.append(divider);
-                } else if (i == 0 && !mPrefs.contains(buttons[i])) {
+                } else if (i == 0 && !mSharedPrefs.contains(buttons[i])) {
                     resultBuilder.append(buttons[i]);
                     resultBuilder.append(divider);
                 }
@@ -332,6 +334,10 @@ public class App extends Application {
 
     public String createResponseData(String action, String phoneNumber, String deviceAddress) {
         return createResponseData(action, phoneNumber, deviceAddress, "");
+    }
+
+    public String createResponseData(String action) {
+        return createResponseData(action, "", "", "");
     }
 
     public String createResponseData(String action, String deviceAddress) {
@@ -549,5 +555,17 @@ public class App extends Application {
         if (PermissionsActivity.testPermission(Manifest.permission.SEND_SMS)) {
             SmsManager.getDefault().sendTextMessage(phoneNumber, null, message, null, null);
         }
+    }
+
+    public void startWebServer() {
+        if (mPrefs.getString("connection_type").equals("http")) {
+            mWebServer.start(mPrefs.getInt("web_server_port"));
+            mWebServer.setServerAddress(mPrefs.getString("web_server_host"),
+                    mPrefs.getInt("web_server_port"));
+        }
+    }
+
+    public void stopWebServer() {
+        mWebServer.stop();
     }
 }

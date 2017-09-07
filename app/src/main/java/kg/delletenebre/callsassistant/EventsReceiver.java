@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Telephony;
@@ -14,6 +15,8 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import kg.delletenebre.callsassistant.utils.Debug;
 
 public class EventsReceiver extends BroadcastReceiver {
 
@@ -142,50 +145,19 @@ public class EventsReceiver extends BroadcastReceiver {
                         break;
                 }
                 break;
-            case App.ACTION_CALL_DISMISS:
-                Debug.log("**** ACTION_CALL_DISMISS ****");
-                fApp.endCall();
-                break;
-            case App.ACTION_CALL_ANSWER:
-                Debug.log("**** ACTION_CALL_ANSWER ****");
-                Debug.log("No \"legal\" way to call answer programmatically");
-                break;
-            case App.ACTION_SMS:
-                Debug.log("**** ACTION_SMS ****");
-                fApp.endCall();
-                String smsMessage = fApp.getPrefs().getString("message_sms_" + intent.getStringExtra("buttonNumber"),
-                        context.getString(R.string.pref_default_message));
-                fApp.sendSMS(intent.getStringExtra("phoneNumber"), smsMessage);
-                break;
-            case App.ACTION_GPS:
-                Debug.log("**** ACTION_GPS ****");
-                fApp.endCall();
-                String gpsMessage = fApp.getLocationSMS(fApp.getPrefs().getString("message_gps",
-                        fApp.getString(R.string.pref_default_message_gps)), intent.getStringExtra("coordinates"));
-                Debug.log(intent.getStringExtra("phoneNumber"));
-                Debug.log(gpsMessage);
-                fApp.sendSMS(intent.getStringExtra("phoneNumber"), gpsMessage);
-                break;
-            case App.ACTION_EVENT:
-                Debug.log("**** ACTION_EVENT ****");
-                String event = intent.getStringExtra("event");
-                String eventState = intent.getStringExtra("state");
+            case WifiManager.WIFI_STATE_CHANGED_ACTION:
+                Debug.log("**** WifiManager.WIFI_STATE_CHANGED_ACTION ****");
+                int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
+                        WifiManager.WIFI_STATE_UNKNOWN);
 
-                if ((event.equals("sms") && fApp.getPrefs().getBoolean("noty_show_sms", true))
-                        || (event.equals("call") && fApp.getPrefs().getBoolean("noty_show_calls", true))) {
-                    NotyOverlay noty = NotyOverlay.create(intent.getStringExtra("deviceAddress"),
-                            intent.getStringExtra("number"),
-                            event);
-                    if (eventState.equals("idle") || eventState.equals("missed")) {
-                        noty.close();
-                    } else {
-                        noty.show(intent.getStringExtra("type"),
-                                eventState,
-                                intent.getStringExtra("name"),
-                                intent.getStringExtra("photo"),
-                                intent.getStringExtra("message"),
-                                intent.getStringExtra("buttons"));
-                    }
+                Debug.log("wifiState: " + wifiState);
+                switch (wifiState) {
+                    case WifiManager.WIFI_STATE_DISABLED:
+                        fApp.stopWebServer();
+                        break;
+                    case WifiManager.WIFI_STATE_ENABLED:
+                        fApp.startWebServer();
+                        break;
                 }
                 break;
         }

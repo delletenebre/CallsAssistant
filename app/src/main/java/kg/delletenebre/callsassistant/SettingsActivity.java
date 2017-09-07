@@ -56,6 +56,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 // simple string representation.
                 preference.setSummary(stringValue);
             }
+
             return true;
         }
     };
@@ -142,10 +143,63 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
+                || ConnectionPreferenceFragment.class.getName().equals(fragmentName)
                 || NotificationPreferenceFragment.class.getName().equals(fragmentName)
                 || MessagesPreferenceFragment.class.getName().equals(fragmentName);
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class ConnectionPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_connection);
+            setHasOptionsMenu(true);
+
+            ListPreference connectionType = (ListPreference) findPreference("connection_type");
+            final Preference bluetoothDevicesList = findPreference("bluetooth_device");
+            final Preference webServerHost = findPreference("web_server_host");
+            final Preference webServerPort = findPreference("web_server_port");
+            bluetoothDevicesList.setEnabled(connectionType.getValue().equals("bluetooth"));
+            webServerHost.setEnabled(connectionType.getValue().equals("http"));
+            webServerPort.setEnabled(connectionType.getValue().equals("http"));
+
+            bindPreferenceSummaryToValue(connectionType);
+            bindPreferenceSummaryToValue(bluetoothDevicesList);
+            bindPreferenceSummaryToValue(webServerHost);
+            bindPreferenceSummaryToValue(webServerPort);
+
+            connectionType.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                public boolean onPreferenceChange(Preference preference, Object value) {
+                    String stringValue = value.toString();
+                    bluetoothDevicesList.setEnabled(stringValue.equals("bluetooth"));
+                    webServerHost.setEnabled(stringValue.equals("http"));
+                    webServerPort.setEnabled(stringValue.equals("http"));
+
+                    ListPreference listPreference = (ListPreference) preference;
+                    int index = listPreference.findIndexOfValue(stringValue);
+                    preference.setSummary(
+                            index >= 0
+                                    ? listPreference.getEntries()[index]
+                                    : null);
+
+                    return true;
+                }
+            });
+        }
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            int id = item.getItemId();
+            if (id == android.R.id.home) {
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                return true;
+            }
+
+            getActivity().sendBroadcast(new Intent(App.ACTION_SETTINGS_CHANGED));
+
+            return super.onOptionsItemSelected(item);
+        }
+    }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class NotificationPreferenceFragment extends PreferenceFragment {
@@ -155,11 +209,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_notification);
             setHasOptionsMenu(true);
 
-            bindPreferenceSummaryToValue(findPreference("bluetooth_device"));
             bindPreferenceSummaryToValue(findPreference("normal_size"));
             bindPreferenceSummaryToValue(findPreference("noty_width"));
         }
-
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
@@ -185,7 +237,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("message_sms_3"));
             bindPreferenceSummaryToValue(findPreference("message_gps"));
         }
-
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
@@ -196,4 +247,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return super.onOptionsItemSelected(item);
         }
     }
+
+
 }

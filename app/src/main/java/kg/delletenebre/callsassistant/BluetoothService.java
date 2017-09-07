@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
+import kg.delletenebre.callsassistant.utils.Debug;
+
 public class BluetoothService {
 
     // Current connection state
@@ -258,20 +260,19 @@ public class BluetoothService {
     }
 
     private class ClientThread extends Thread {
-        private final BluetoothSocket mBluetoothSocket;
+        private BluetoothSocket mBluetoothSocket;
         private final BluetoothDevice mBluetoothDevice;
         private final String mData;
 
         ClientThread(BluetoothDevice device, String data) {
             mBluetoothDevice = device;
-            BluetoothSocket tmp = null;
-
-            try {
-                tmp = mBluetoothDevice.createRfcommSocketToServiceRecord(CONNECTION_UUID);
-            } catch (IOException e) {
-                Debug.error("createRfcommSocketToServiceRecord() failed");
-            }
-            mBluetoothSocket = tmp;
+//            BluetoothSocket tmp = null;
+//            try {
+//                tmp = mBluetoothDevice.createRfcommSocketToServiceRecord(CONNECTION_UUID);
+//            } catch (IOException e) {
+//                Debug.error("createRfcommSocketToServiceRecord() failed");
+//            }
+//            mBluetoothSocket = tmp;
             mData = data;
         }
 
@@ -281,23 +282,52 @@ public class BluetoothService {
             setState(BluetoothState.CONNECTING);
             mBluetoothAdapter.cancelDiscovery();
 
-            try {
-                mBluetoothSocket.connect();
-            } catch (IOException e) {
-                try {
-                    mBluetoothSocket.close();
-                } catch (IOException e2) {
-                    Debug.error("unable to close() socket during connection failure");
+            boolean connected = false;
+            int attempt = 1;
+            while (!connected) {
+                if (isInterrupted() || attempt > 3) {
+                    break;
                 }
-                connectionFailed();
-                return;
+                try {
+                    mBluetoothSocket = mBluetoothDevice.createRfcommSocketToServiceRecord(CONNECTION_UUID);
+                    mBluetoothSocket.connect();
+                    connected = mBluetoothSocket.isConnected();
+                } catch (Exception e) {
+                    try {
+                        if (mBluetoothSocket != null) {
+                            mBluetoothSocket.close();
+                        }
+                        synchronized (this) {
+                            sleep(500);
+                        }
+                    } catch (Exception e1) {
+                        // nothing
+                    }
+                }
+                attempt++;
             }
+
+//            try {
+//                mBluetoothSocket.connect();
+//            } catch (IOException e) {
+//                try {
+//                    mBluetoothSocket.close();
+//                } catch (IOException e2) {
+//                    Debug.error("unable to close() socket during connection failure");
+//                }
+//                connectionFailed();
+//                return;
+//            }
 
             synchronized (BluetoothService.this) {
                 mClientThread = null;
             }
 
-            connected(mBluetoothSocket, mData);
+            if (connected) {
+                connected(mBluetoothSocket, mData);
+            } else {
+                connectionFailed();
+            }
         }
 
         void cancel() {

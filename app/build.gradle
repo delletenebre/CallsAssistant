@@ -5,10 +5,10 @@ android {
     buildToolsVersion "26.0.1"
     defaultConfig {
         applicationId "kg.delletenebre.callsassistant"
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 26
-        versionCode 4
-        versionName "1.0"
+        versionCode 6
+        versionName "1.1"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
@@ -31,12 +31,13 @@ dependencies {
     compile "com.android.support:cardview-v7:$supportLibsVersion"
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.instabug.library:instabug:4.2.10'
+    compile 'com.koushikdutta.async:androidasync:2.2.1'
 }
 
 
 
 tasks.whenTaskAdded { task ->
-    if (task.name.equals("lint")) {
+    if (task.name == "lint") {
         task.enabled = false
     }
 }

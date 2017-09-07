@@ -37,6 +37,8 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.Map;
 
+import kg.delletenebre.callsassistant.utils.Debug;
+
 class NotyOverlay {
 
     private static Map<String, NotyOverlay> sOverlays = new HashMap<>();
@@ -223,8 +225,7 @@ class NotyOverlay {
             btnCallDismiss.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String data = mApp.createResponseData("cd", mDeviceAddress);
-                    mApp.connectAndSend(mDeviceAddress, data);
+                    mApp.connectAndSend(mDeviceAddress, mApp.createResponseData("cd"));
                     close();
                 }
             });
@@ -232,8 +233,7 @@ class NotyOverlay {
             btnCallAnswer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String data = mApp.createResponseData("ca", mDeviceAddress);
-                    mApp.connectAndSend(mDeviceAddress, data);
+                    mApp.connectAndSend(mDeviceAddress, mApp.createResponseData("ca"));
                     close();
                 }
             });
@@ -259,8 +259,8 @@ class NotyOverlay {
                         if (buttonName.equals("gps")) {
                             extra = mApp.getLocationString();
                         }
-                        String data = mApp.createResponseData(buttonName, mCallNumber, mDeviceAddress, extra);
-                        mApp.connectAndSend(mDeviceAddress, data);
+                        mApp.connectAndSend(mDeviceAddress,
+                                mApp.createResponseData(buttonName, mCallNumber, "", extra));
                         close();
                     }
                 });
@@ -376,13 +376,9 @@ class NotyOverlay {
         //Stretch buttons
         int idealChildWidth = ((gl.getMeasuredWidth())/gl.getColumnCount());
 
-        Debug.log("width: " + gl.getMeasuredWidth());
-
         for (int i = 0; i < gl.getChildCount(); i++) {
             Button button = (Button) gl.getChildAt(i);
             button.setWidth(idealChildWidth);
-
-            Debug.log("width: " + idealChildWidth);
         }
     }
 }

@@ -26,6 +26,8 @@ import org.json.JSONObject;
 
 import java.util.Map;
 
+import kg.delletenebre.callsassistant.utils.Debug;
+
 import static android.app.Activity.RESULT_OK;
 
 public class DebugFragment extends Fragment {
