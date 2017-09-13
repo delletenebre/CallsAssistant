@@ -56,6 +56,7 @@
     <string name="notification_id" translatable="false">%1$s|%2$s|%3$s</string>
 
     <string name="incoming_call">Incoming call</string>
+    <string name="outgoing_call">Outgoing call</string>
     <string name="incoming_sms">Incoming SMS</string>
     <string name="incoming_message">Incoming message</string>
 
@@ -77,19 +78,25 @@
         <item>bluetooth</item>
         <item>http</item>
     </string-array>
-    <string name="pref_title_web_server_port">Server port</string>
+    <string name="pref_title_web_server_port">Port</string>
     <string name="pref_default_web_server_port" translatable="false">8877</string>
-    <string name="pref_title_web_server_host">Server IP</string>
+    <string name="pref_title_web_server_host">\"Tablet\'s\" IP</string>
     <string name="pref_default_web_server_host" translatable="false">192.168.43.250</string>
-    <string name="pref_title_device_server">This device will show notification</string>
     <bool name="pref_default_device_server" translatable="false">false</bool>
 
-    <string name="pref_header_notification">Notification</string>
-    <string name="pref_header_messages">Messages</string>
     <string name="pref_header_connection">Connection</string>
-    <string name="pref_category_style">Style</string>
+    <string name="pref_header_phone">Client (\"Phone\")</string>
+    <string name="pref_header_tablet">Server (\"Tablet\")</string>
+
+    <string name="pref_category_connection">Connection</string>
+    <string name="pref_category_show_noty_for">Notifications</string>
+    <string name="pref_category_notification_style">Notification Style</string>
+    <string name="pref_category_extra_buttons">Show buttons</string>
+
+
     <string name="pref_title_bluetooth_device">Bluetooth device</string>
-    <string name="pref_title_noty_show_calls">Show for Calls</string>
+    <string name="pref_title_noty_show_incoming_calls">Show for Incoming Calls</string>
+    <string name="pref_title_noty_show_outgoing_calls">Show for Outgoing Calls</string>
     <string name="pref_title_noty_show_sms">Show for SMS</string>
     <string name="pref_title_normal_size">UI size (dp)</string>
     <string name="pref_default_normal_size" translatable="false">20</string>
@@ -100,4 +107,9 @@
     <string name="pref_title_message">Message</string>
     <string name="pref_title_message_gps">Message (before link)</string>
     <string name="pref_default_message_gps">I\'m on my way:</string>
+
+    <bool name="pref_default_small_close_zone">false</bool>
+    <string name="pref_title_small_close_zone">Small close zone</string>
+    <string name="pref_summary_small_close_zone">When enabled, notification will close only on
+        click at name/phone</string>
 </resources>

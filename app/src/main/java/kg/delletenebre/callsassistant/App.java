@@ -106,14 +106,14 @@ public class App extends Application {
                         case ACTION_SMS:
                             Debug.log("**** ACTION_SMS ****");
                             endCall();
-                            String smsMessage = getPrefs().getString("message_sms_" + intent.getStringExtra("buttonNumber"),
+                            String smsMessage = getSharedPrefs().getString("message_sms_" + intent.getStringExtra("buttonNumber"),
                                     context.getString(R.string.pref_default_message));
                             sendSMS(intent.getStringExtra("phoneNumber"), smsMessage);
                             break;
                         case ACTION_GPS:
                             Debug.log("**** ACTION_GPS ****");
                             endCall();
-                            String gpsMessage = getLocationSMS(getPrefs().getString("message_gps",
+                            String gpsMessage = getLocationSMS(getSharedPrefs().getString("message_gps",
                                     getString(R.string.pref_default_message_gps)), intent.getStringExtra("coordinates"));
                             Debug.log(intent.getStringExtra("phoneNumber"));
                             Debug.log(gpsMessage);
@@ -122,10 +122,10 @@ public class App extends Application {
                         case ACTION_EVENT:
                             Debug.log("**** ACTION_EVENT ****");
                             String event = intent.getStringExtra("event");
+                            String eventDisabled = intent.getStringExtra("disabled");
                             String eventState = intent.getStringExtra("state");
 
-                            if ((event.equals("sms") && getPrefs().getBoolean("noty_show_sms", true))
-                                    || (event.equals("call") && getPrefs().getBoolean("noty_show_calls", true))) {
+                            if (!eventDisabled.equals("true")) {
                                 NotyOverlay noty = NotyOverlay.create(intent.getStringExtra("deviceAddress"),
                                         intent.getStringExtra("number"),
                                         event);
@@ -234,9 +234,13 @@ public class App extends Application {
         startBluetoothCommunication();
     }
 
-    public SharedPreferences getPrefs()
+    public SharedPreferences getSharedPrefs()
     {
         return mSharedPrefs;
+    }
+    public Prefs getPrefs()
+    {
+        return mPrefs;
     }
     public void startBluetoothCommunication() {
         mBluetoothService.startWaitingConnections();
@@ -249,13 +253,17 @@ public class App extends Application {
         startBluetoothCommunication();
     }
 
-    public void connectAndSend(String bluetoothAddress, String data) {
+    public void connectAndSend(String deviceAddress, String data) {
         if (mPrefs.getString("connection_type").equals("bluetooth")) {
-            mBluetoothService.connectAndSend(bluetoothAddress, data);
+            mBluetoothService.connectAndSend(deviceAddress, data);
         }
 
         if (mPrefs.getString("connection_type").equals("http")) {
-            mWebServer.send(data);
+            if (deviceAddress.startsWith("http")) {
+                mWebServer.send(deviceAddress, data);
+            } else {
+                mWebServer.send(data);
+            }
         }
 
     }
@@ -281,6 +289,22 @@ public class App extends Application {
             if (mPrefs.getString("connection_type").equals("http")) {
                 info.putOpt("deviceAddress", mWebServer.getDeviceAddress());
             }
+
+            boolean showForIncomingCalls = event.equals("call")
+                    && type.equals("incoming")
+                    && getSharedPrefs().getBoolean("noty_show_incoming_calls", true);
+            boolean showForOutgoingCalls = event.equals("call")
+                    && type.equals("outgoing")
+                    && getSharedPrefs().getBoolean("noty_show_outgoing_calls", true);
+            boolean showForSMS = event.equals("sms")
+                    && getSharedPrefs().getBoolean("noty_show_sms", true);
+
+            if (showForIncomingCalls || showForOutgoingCalls || showForSMS) {
+                info.putOpt("disabled", "false");
+            } else {
+                info.putOpt("disabled", "true");
+            }
+
         } catch (JSONException e) {
             Debug.error("JSON object error");
         }
@@ -345,6 +369,10 @@ public class App extends Application {
     }
 
     public Map<String,String> getContactInfo(String phoneNumber) {
+        if (phoneNumber == null) {
+            phoneNumber = "";
+        }
+
         Map<String,String> contact = new HashMap<>();
         contact.put("name", phoneNumber);
         contact.put("photo", "");

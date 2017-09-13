@@ -1,8 +1,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <SwitchPreference android:key="small_close_zone"
+        android:defaultValue="false"
+        android:title="@string/pref_title_small_close_zone"
+        android:summary="@string/pref_summary_small_close_zone" />
+
     <PreferenceCategory
         android:title="@string/pref_category_notification_style">
-
         <EditTextPreference android:key="normal_size"
             android:defaultValue="@string/pref_default_normal_size"
             android:inputType="number"
@@ -10,7 +14,6 @@
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/pref_title_normal_size" />
-
         <EditTextPreference android:key="noty_width"
             android:defaultValue="@string/pref_default_noty_width"
             android:inputType="number"
@@ -18,7 +21,6 @@
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/pref_title_noty_width" />
-
     </PreferenceCategory>
 
 </PreferenceScreen>

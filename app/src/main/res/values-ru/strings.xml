@@ -40,6 +40,7 @@
 
     <!-- Notification -->
     <string name="incoming_call">Входящий звонок</string>
+    <string name="outgoing_call">Исходящий звонок</string>
     <string name="incoming_sms">Входящее SMS</string>
     <string name="incoming_message">Входящее сообщение</string>
 
@@ -49,18 +50,23 @@
 
 
     <!-- Strings related to Settings -->
-    <string name="pref_title_connection_type">Тип соединения</string>
-    <string name="pref_title_web_server_port">Порт сервера</string>
-    <string name="pref_title_web_server_host">IP сервера</string>
-    <string name="pref_title_device_server">Это устройство будет отображать уведомления</string>
-
-    <string name="pref_header_notification">Уведомление</string>
-    <string name="pref_header_messages">Сообщения</string>
     <string name="pref_header_connection">Соединение</string>
-    <string name="pref_category_style">Стиль</string>
+    <string name="pref_header_phone">Клиент (\"Телефон\")</string>
+    <string name="pref_header_tablet">Сервер (\"Планшет\")</string>
+
+    <string name="pref_category_connection">Соединение</string>
+    <string name="pref_category_show_noty_for">События</string>
+    <string name="pref_category_notification_style">Стиль уведомления</string>
+    <string name="pref_category_extra_buttons">Кнопки</string>
+
+    <string name="pref_title_connection_type">Тип соединения</string>
+    <string name="pref_title_web_server_port">Порт</string>
+    <string name="pref_title_web_server_host">IP \"Планшета\"</string>
+
     <string name="pref_title_bluetooth_device">Bluetooth-устройство</string>
-    <string name="pref_title_noty_show_calls">Отображать для звонков</string>
-    <string name="pref_title_noty_show_sms">Отображать для SMS</string>
+    <string name="pref_title_noty_show_incoming_calls">Уведомлять о входящих звонках</string>
+    <string name="pref_title_noty_show_outgoing_calls">Уведомлять о исходящих звонках</string>
+    <string name="pref_title_noty_show_sms">Уведомлять о SMS</string>
     <string name="pref_title_normal_size">Размер элементов (dp)</string>
     <string name="pref_title_noty_width">Ширина уведомления (%)</string>
     <string name="pref_default_message">Я за рулём, перезвоню позже.</string>
@@ -68,4 +74,8 @@
     <string name="pref_title_message">Сообщение</string>
     <string name="pref_title_message_gps">Сообщение</string>
     <string name="pref_default_message_gps">Я в пути:</string>
+
+    <string name="pref_title_small_close_zone">Сократить область скрытия</string>
+    <string name="pref_summary_small_close_zone">Если опция включена, то уведомление будет
+        скрыто, только при нажатии по области имени/номера абонента</string>
 </resources>

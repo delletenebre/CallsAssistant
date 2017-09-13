@@ -144,8 +144,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
                 || ConnectionPreferenceFragment.class.getName().equals(fragmentName)
-                || NotificationPreferenceFragment.class.getName().equals(fragmentName)
-                || MessagesPreferenceFragment.class.getName().equals(fragmentName);
+                || PhonePreferenceFragment.class.getName().equals(fragmentName)
+                || TabletPreferenceFragment.class.getName().equals(fragmentName);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -157,32 +157,22 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             setHasOptionsMenu(true);
 
             ListPreference connectionType = (ListPreference) findPreference("connection_type");
-            final Preference bluetoothDevicesList = findPreference("bluetooth_device");
-            final Preference webServerHost = findPreference("web_server_host");
             final Preference webServerPort = findPreference("web_server_port");
-            bluetoothDevicesList.setEnabled(connectionType.getValue().equals("bluetooth"));
-            webServerHost.setEnabled(connectionType.getValue().equals("http"));
             webServerPort.setEnabled(connectionType.getValue().equals("http"));
 
             bindPreferenceSummaryToValue(connectionType);
-            bindPreferenceSummaryToValue(bluetoothDevicesList);
-            bindPreferenceSummaryToValue(webServerHost);
             bindPreferenceSummaryToValue(webServerPort);
 
             connectionType.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 public boolean onPreferenceChange(Preference preference, Object value) {
                     String stringValue = value.toString();
-                    bluetoothDevicesList.setEnabled(stringValue.equals("bluetooth"));
-                    webServerHost.setEnabled(stringValue.equals("http"));
                     webServerPort.setEnabled(stringValue.equals("http"));
-
                     ListPreference listPreference = (ListPreference) preference;
                     int index = listPreference.findIndexOfValue(stringValue);
                     preference.setSummary(
                             index >= 0
                                     ? listPreference.getEntries()[index]
                                     : null);
-
                     return true;
                 }
             });
@@ -195,22 +185,37 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 return true;
             }
 
-            getActivity().sendBroadcast(new Intent(App.ACTION_SETTINGS_CHANGED));
-
             return super.onOptionsItemSelected(item);
+        }
+
+        @Override
+        public void onDestroy() {
+            getActivity().sendBroadcast(new Intent(App.ACTION_SETTINGS_CHANGED));
+            super.onDestroy();
         }
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class NotificationPreferenceFragment extends PreferenceFragment {
+    public static class PhonePreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_notification);
+            addPreferencesFromResource(R.xml.pref_phone);
             setHasOptionsMenu(true);
 
-            bindPreferenceSummaryToValue(findPreference("normal_size"));
-            bindPreferenceSummaryToValue(findPreference("noty_width"));
+            String connectionType = App.getInstance().getPrefs().getString("connection_type");
+            Preference bluetoothDevicesList = findPreference("bluetooth_device");
+            Preference webServerHost = findPreference("web_server_host");
+            bluetoothDevicesList.setEnabled(connectionType.equals("bluetooth"));
+            webServerHost.setEnabled(connectionType.equals("http"));
+
+            bindPreferenceSummaryToValue(bluetoothDevicesList);
+            bindPreferenceSummaryToValue(webServerHost);
+            bindPreferenceSummaryToValue(findPreference("message_sms_1"));
+            bindPreferenceSummaryToValue(findPreference("message_sms_2"));
+            bindPreferenceSummaryToValue(findPreference("message_sms_3"));
+            bindPreferenceSummaryToValue(findPreference("message_gps"));
+
         }
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
@@ -225,17 +230,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class MessagesPreferenceFragment extends PreferenceFragment {
+    public static class TabletPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_messages);
+            addPreferencesFromResource(R.xml.pref_tablet);
             setHasOptionsMenu(true);
 
-            bindPreferenceSummaryToValue(findPreference("message_sms_1"));
-            bindPreferenceSummaryToValue(findPreference("message_sms_2"));
-            bindPreferenceSummaryToValue(findPreference("message_sms_3"));
-            bindPreferenceSummaryToValue(findPreference("message_gps"));
+            bindPreferenceSummaryToValue(findPreference("normal_size"));
+            bindPreferenceSummaryToValue(findPreference("noty_width"));
         }
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {

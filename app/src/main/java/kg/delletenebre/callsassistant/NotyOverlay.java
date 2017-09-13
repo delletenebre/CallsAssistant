@@ -109,7 +109,11 @@ class NotyOverlay {
             int headerIcon = R.drawable.ic_phone_black;
             switch (mEvent) {
                 case "call":
-                    headerTitle = mContext.getString(R.string.incoming_call);
+                    if (type.equals("outgoing")) {
+                        headerTitle = mContext.getString(R.string.outgoing_call);
+                    } else {
+                        headerTitle = mContext.getString(R.string.incoming_call);
+                    }
                     contactExtraText = name.equals(mCallNumber) ? "" : mCallNumber;
                     break;
 
@@ -148,7 +152,7 @@ class NotyOverlay {
             RelativeLayout ltRoot = mNotificationLayout.findViewById(R.id.root_layout);
             //LinearLayout ltNotification = (LinearLayout) mNotificationLayout.findViewById(R.id.notification_layout);
             CardView ltNotification = mNotificationLayout.findViewById(R.id.notification_layout);
-            RelativeLayout ltHeader = mNotificationLayout.findViewById(R.id.header_layout);
+            //RelativeLayout ltHeader = mNotificationLayout.findViewById(R.id.header_layout);
             TextView vwHeaderTitle = mNotificationLayout.findViewById(R.id.header_title);
             ImageView vwHeaderIcon = mNotificationLayout.findViewById(R.id.header_icon);
             LinearLayout ltContact = mNotificationLayout.findViewById(R.id.contact_layout);
@@ -167,6 +171,15 @@ class NotyOverlay {
             int notyWidth = Integer.parseInt(mApp.getPrefs().getString("noty_width", mContext.getString(R.string.pref_default_noty_width)));
             ltNotification.getLayoutParams().width = (int) (screenWidth / 100.0f * notyWidth);
             ViewCompat.setElevation(ltNotification, 10);
+
+            if (!mApp.getPrefs().getBoolean("small_close_zone")) {
+                ltRoot.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        close();
+                    }
+                });
+            }
 
             /* **** HEADER **** */
             vwHeaderTitle.setTextSize(smallSize);
@@ -242,36 +255,38 @@ class NotyOverlay {
 
             /* **** OTHER BUTTONS **** */
             String[] enabledButtons = buttons.split(",");
-            for (final String buttonName: enabledButtons) {
-                AppCompatButton responseButton = new AppCompatButton(mContext);
+            if (buttons.length() > 0) {
+                for (final String buttonName : enabledButtons) {
+                    AppCompatButton responseButton = new AppCompatButton(mContext);
 
-                if (buttonName.charAt(0) == 's') {
-                    int number = (int) buttonName.charAt(1) - '0';
-                    responseButton.setText(String.format(mContext.getString(R.string.button_text_sms), number));
-                } else if (buttonName.equals("gps")) {
-                    responseButton.setText(mContext.getString(R.string.button_text_gps));
-                }
-
-                responseButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        String extra = "";
-                        if (buttonName.equals("gps")) {
-                            extra = mApp.getLocationString();
-                        }
-                        mApp.connectAndSend(mDeviceAddress,
-                                mApp.createResponseData(buttonName, mCallNumber, "", extra));
-                        close();
+                    if (buttonName.charAt(0) == 's') {
+                        int number = (int) buttonName.charAt(1) - '0';
+                        responseButton.setText(String.format(mContext.getString(R.string.button_text_sms), number));
+                    } else if (buttonName.equals("gps")) {
+                        responseButton.setText(mContext.getString(R.string.button_text_gps));
                     }
-                });
 
-                ltResponseButtons.addView(responseButton);
+                    responseButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            String extra = "";
+                            if (buttonName.equals("gps")) {
+                                extra = mApp.getLocationString();
+                            }
+                            mApp.connectAndSend(mDeviceAddress,
+                                    mApp.createResponseData(buttonName, mCallNumber, "", extra));
+                            close();
+                        }
+                    });
 
-                int icon = R.drawable.ic_mail_outline_black;
-                if (buttonName.equals("gps")) {
-                    icon = R.drawable.ic_my_location_black_24dp;
+                    ltResponseButtons.addView(responseButton);
+
+                    int icon = R.drawable.ic_mail_outline_black;
+                    if (buttonName.equals("gps")) {
+                        icon = R.drawable.ic_my_location_black_24dp;
+                    }
+                    setButtonStyle(responseButton, normalSize, buttonHeight, icon);
                 }
-                setButtonStyle(responseButton, normalSize, buttonHeight, icon);
             }
 
             /* **** ----- ------- **** */
@@ -306,9 +321,11 @@ class NotyOverlay {
     }
 
     void close() {
-        if (mNotificationLayout != null){
+        if (mNotificationLayout != null) {
             mWindowManager.removeView(mNotificationLayout);
             mNotificationLayout = null;
+
+            Debug.log("Overlay with key [ " + mId + " ] closed");
         }
 
         if (sOverlays.containsKey(mId)) {

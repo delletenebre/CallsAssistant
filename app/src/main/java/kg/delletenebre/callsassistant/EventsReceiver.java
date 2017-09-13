@@ -67,6 +67,7 @@ public class EventsReceiver extends BroadcastReceiver {
                     if (!sCallLastState.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
                         // исходящий
                         infoType = "outgoing";
+                        infoPhoneNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
                         sCallIsIncoming = false;
                     }
                 } else if (callState.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
@@ -85,12 +86,10 @@ public class EventsReceiver extends BroadcastReceiver {
                 }
                 sCallLastState = callState;
 
-                if (fApp.getPrefs().getBoolean("noty_show_calls", true)) {
-                    JSONObject callData = fApp.createJsonData(infoEvent, infoType, infoState,
-                            infoPhoneNumber, infoMessage);
-                    fApp.connectAndSend(callData.toString());
-                    Debug.info("JSON data (call): " + callData.toString());
-                }
+                JSONObject callData = fApp.createJsonData(infoEvent, infoType, infoState,
+                        infoPhoneNumber, infoMessage);
+                fApp.connectAndSend(callData.toString());
+                Debug.info("JSON call: " + callData.toString());
 
                 break;
             case "android.provider.Telephony.SMS_RECEIVED":
@@ -124,12 +123,11 @@ public class EventsReceiver extends BroadcastReceiver {
                     }
                 }
 
-                if (fApp.getPrefs().getBoolean("noty_show_sms", true)) {
-                    JSONObject smsData = fApp.createJsonData(infoEvent, infoType, infoState,
-                            infoPhoneNumber, infoMessage);
-                    fApp.connectAndSend(smsData.toString());
-                    Debug.info("JSON SMS: " + smsData.toString());
-                }
+                JSONObject smsData = fApp.createJsonData(infoEvent, infoType, infoState,
+                        infoPhoneNumber, infoMessage);
+                fApp.connectAndSend(smsData.toString());
+                Debug.info("JSON SMS: " + smsData.toString());
+
                 break;
             case BluetoothAdapter.ACTION_STATE_CHANGED:
                 Debug.log("**** BluetoothAdapter.ACTION_STATE_CHANGED ****");

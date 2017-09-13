@@ -1,0 +1,77 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/pref_category_connection">
+        <kg.delletenebre.callsassistant.BluetoothDevicesListPreference
+            android:key="bluetooth_device"
+            android:title="@string/pref_title_bluetooth_device" />
+        <EditTextPreference
+            android:key="web_server_host"
+            android:defaultValue="@string/pref_default_web_server_host"
+            android:title="@string/pref_title_web_server_host"
+            android:selectAllOnFocus="true"
+            android:digits="0123456789."
+            android:maxLines="1" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_category_show_noty_for">
+        <SwitchPreference android:key="noty_show_incoming_calls"
+            android:title="@string/pref_title_noty_show_incoming_calls"
+            android:defaultValue="true" />
+        <SwitchPreference android:key="noty_show_outgoing_calls"
+            android:title="@string/pref_title_noty_show_outgoing_calls"
+            android:defaultValue="true" />
+        <SwitchPreference android:key="noty_show_sms"
+            android:title="@string/pref_title_noty_show_sms"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_category_extra_buttons">
+        <SwitchPreference android:key="s1"
+            android:defaultValue="true"
+            android:title="@string/pref_title_show_button"
+            android:summary="SMS #1" />
+        <EditTextPreference android:key="message_sms_1"
+            android:dependency="s1"
+            android:title="@string/pref_title_message"
+            android:defaultValue="@string/pref_default_message"
+            android:inputType="text"
+            android:selectAllOnFocus="true" />
+
+        <SwitchPreference android:key="s2"
+            android:defaultValue="true"
+            android:title="@string/pref_title_show_button"
+            android:summary="SMS #2" />
+        <EditTextPreference android:key="message_sms_2"
+            android:dependency="s2"
+            android:title="@string/pref_title_message"
+            android:defaultValue="@string/pref_default_message"
+            android:inputType="text"
+            android:selectAllOnFocus="true" />
+
+        <SwitchPreference android:key="s3"
+            android:defaultValue="true"
+            android:title="@string/pref_title_show_button"
+            android:summary="SMS #3" />
+        <EditTextPreference android:key="message_sms_3"
+            android:dependency="s3"
+            android:title="@string/pref_title_message"
+            android:defaultValue="@string/pref_default_message"
+            android:inputType="text"
+            android:selectAllOnFocus="true" />
+
+        <SwitchPreference android:key="gps"
+            android:defaultValue="true"
+            android:title="@string/pref_title_show_button"
+            android:summary="GPS" />
+        <EditTextPreference android:key="message_gps"
+            android:dependency="gps"
+            android:title="@string/pref_title_message_gps"
+            android:defaultValue="@string/pref_default_message_gps"
+            android:inputType="text"
+            android:selectAllOnFocus="true" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
