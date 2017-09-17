@@ -9,6 +9,9 @@
 
     <string name="pref_bt_device_no_device">Нет устройства</string>
 
+    <string name="bluetooth_disabled">Bluetoooth выключен</string>
+    <string name="enable">Включить</string>
+
     <!-- Debug Fragment -->
     <string name="tab_debug">отладка</string>
 

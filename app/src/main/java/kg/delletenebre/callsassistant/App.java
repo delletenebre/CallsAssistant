@@ -16,13 +16,16 @@ import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatDelegate;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
+import android.view.View;
 
 import com.android.internal.telephony.ITelephony;
 import com.instabug.library.Instabug;
@@ -36,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +59,12 @@ public class App extends Application {
     protected static final String ACTION_GPS = "kg.calls.assistant.gps";
     protected static final String ACTION_RESPONSE = "kg.calls.assistant.response";
     protected static final String ACTION_SETTINGS_CHANGED = "kg.calls.assistant.settings_changed";
+    protected static final String LOCAL_ACTION_IP_CHANGED = "kg.calls.assistant.local.ip_changed";
+    protected static final String LOCAL_ACTION_SERVER_START = "kg.calls.assistant.local.server_start";
+    protected static final String LOCAL_ACTION_SERVER_STOP = "kg.calls.assistant.local.server_stop";
+
+    protected static final String CONNECTION_TYPE_WIFI = "http";
+    protected static final String CONNECTION_TYPE_BLUETOOTH = "bluetooth";
 
 
     private SharedPreferences mSharedPrefs;
@@ -62,6 +72,7 @@ public class App extends Application {
     private BluetoothService mBluetoothService;
     private LocationManager mLocationManager;
     private WebServer mWebServer;
+    private WifiManager mWifiManager;
 
 
     @Override
@@ -80,6 +91,7 @@ public class App extends Application {
         mPrefs = new Prefs(this);
         mLocationManager = (LocationManager)
                 getSystemService(Context.LOCATION_SERVICE);
+        mWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_CALL_ANSWER);
@@ -143,7 +155,7 @@ public class App extends Application {
                             break;
                         case ACTION_SETTINGS_CHANGED:
                             Debug.log("**** ACTION_SETTINGS_CHANGED ****");
-                            if (mPrefs.getString("connection_type").equals("http")) {
+                            if (mPrefs.getString("connection_type").equals(CONNECTION_TYPE_WIFI)) {
                                 startWebServer();
                             } else {
                                 stopWebServer();
@@ -201,14 +213,16 @@ public class App extends Application {
                         String buttons = data.getString("buttons");
 
                         Debug.log("======== Received data ========");
-                        Debug.log("RECEIVED event: " + event);
-                        Debug.log("RECEIVED type: " + type);
-                        Debug.log("RECEIVED number: " + number);
-                        Debug.log("RECEIVED state: " + state);
-                        Debug.log("RECEIVED name: " + contactName);
-                        Debug.log("RECEIVED photo: " + contactPhoto);
-                        Debug.log("RECEIVED message: " + message);
-                        Debug.log("RECEIVED deviceAddress: " + deviceAddress);
+                        Iterator<String> iterator = data.keys();
+                        while (iterator.hasNext()) {
+                            String key = iterator.next();
+                            try {
+                                Object value = data.get(key);
+                                Debug.log(key + " > " + String.valueOf(value));
+                            } catch (JSONException jsone) {
+                                // Something went wrong!
+                            }
+                        }
                         Debug.log("======== ======== ==== ========");
 
                         Intent intent = new Intent(ACTION_EVENT);
@@ -221,6 +235,7 @@ public class App extends Application {
                         intent.putExtra("message", message);
                         intent.putExtra("buttons", buttons);
                         intent.putExtra("deviceAddress", deviceAddress);
+                        intent.putExtra("disabled", data.getString("disabled"));
                         sendBroadcast(intent);
                     }
                 } catch (Exception e) {
@@ -254,11 +269,11 @@ public class App extends Application {
     }
 
     public void connectAndSend(String deviceAddress, String data) {
-        if (mPrefs.getString("connection_type").equals("bluetooth")) {
+        if (mPrefs.getString("connection_type").equals(CONNECTION_TYPE_BLUETOOTH)) {
             mBluetoothService.connectAndSend(deviceAddress, data);
         }
 
-        if (mPrefs.getString("connection_type").equals("http")) {
+        if (mPrefs.getString("connection_type").equals(CONNECTION_TYPE_WIFI)) {
             if (deviceAddress.startsWith("http")) {
                 mWebServer.send(deviceAddress, data);
             } else {
@@ -286,7 +301,7 @@ public class App extends Application {
             info.putOpt("name", contact.get("name"));
             info.putOpt("photo", contact.get("photo"));
             info.putOpt("message", message);
-            if (mPrefs.getString("connection_type").equals("http")) {
+            if (mPrefs.getString("connection_type").equals(CONNECTION_TYPE_WIFI)) {
                 info.putOpt("deviceAddress", mWebServer.getDeviceAddress());
             }
 
@@ -317,23 +332,21 @@ public class App extends Application {
     private String getEnabledButtons() {
         StringBuilder resultBuilder = new StringBuilder();
         String[] buttons = {"s1", "s2", "s3", "gps"};
-        char divider = ','; // TODO CHECK TRANSLATION
+        char divider = ',';
 
-        if (mSharedPrefs != null) {
-            for (int i = 0; i < buttons.length; i++) {
-                if (mSharedPrefs.getBoolean(buttons[i], false)) {
-                    resultBuilder.append(buttons[i]);
-                    resultBuilder.append(divider);
-                } else if (i == 0 && !mSharedPrefs.contains(buttons[i])) {
-                    resultBuilder.append(buttons[i]);
-                    resultBuilder.append(divider);
-                }
+        for (int i = 0; i < buttons.length; i++) {
+            if (mSharedPrefs.getBoolean(buttons[i], false)) {
+                resultBuilder.append(buttons[i]);
+                resultBuilder.append(divider);
+            } else if (i == 0 && !mSharedPrefs.contains(buttons[i])) {
+                resultBuilder.append(buttons[i]);
+                resultBuilder.append(divider);
             }
+        }
 
-            int resultBuilderLength = resultBuilder.length();
-            if (resultBuilderLength > 0) {
-                resultBuilder.deleteCharAt(resultBuilderLength - 1);
-            }
+        int resultBuilderLength = resultBuilder.length();
+        if (resultBuilderLength > 0) {
+            resultBuilder.deleteCharAt(resultBuilderLength - 1);
         }
 
         return resultBuilder.toString();
@@ -356,16 +369,8 @@ public class App extends Application {
         return response.toString();
     }
 
-    public String createResponseData(String action, String phoneNumber, String deviceAddress) {
-        return createResponseData(action, phoneNumber, deviceAddress, "");
-    }
-
     public String createResponseData(String action) {
         return createResponseData(action, "", "", "");
-    }
-
-    public String createResponseData(String action, String deviceAddress) {
-        return createResponseData(action, "", deviceAddress, "");
     }
 
     public Map<String,String> getContactInfo(String phoneNumber) {
@@ -428,6 +433,7 @@ public class App extends Application {
 
         return contact;
     }
+
 
     public Map<String,String> getContactInfo(Cursor cursor) {
         Map<String,String> contact = new HashMap<>();
@@ -586,14 +592,46 @@ public class App extends Application {
     }
 
     public void startWebServer() {
-        if (mPrefs.getString("connection_type").equals("http")) {
+        if (mPrefs.getString("connection_type").equals(CONNECTION_TYPE_WIFI)) {
             mWebServer.start(mPrefs.getInt("web_server_port"));
             mWebServer.setServerAddress(mPrefs.getString("web_server_host"),
                     mPrefs.getInt("web_server_port"));
         }
     }
 
+    public WebServer getWebServer() {
+        return mWebServer;
+    }
+
     public void stopWebServer() {
         mWebServer.stop();
+    }
+
+    public boolean isBluetoothEnabled() {
+        return mBluetoothService != null && mBluetoothService.isEnabled();
+    }
+
+    public void enableBluetooth() {
+        if (mBluetoothService != null) {
+            mBluetoothService.enable();
+        }
+    }
+
+    public void checkBluetoothEnabled(View rootView) {
+        if (getPrefs().getString("connection_type").equals(CONNECTION_TYPE_BLUETOOTH) && !isBluetoothEnabled()) {
+            Snackbar.make(rootView,
+                    R.string.bluetooth_disabled, Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.enable, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        App.getInstance().enableBluetooth();
+                    }
+                })
+                .show();
+        }
+    }
+
+    public WifiManager getWifiManager() {
+        return mWifiManager;
     }
 }

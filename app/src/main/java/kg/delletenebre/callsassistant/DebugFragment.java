@@ -132,6 +132,8 @@ public class DebugFragment extends Fragment {
                 }
             }
         });
+
+        ((MainActivity) getActivity()).updateIp();
     }
 
     @Override

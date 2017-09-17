@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -148,14 +150,46 @@ public class EventsReceiver extends BroadcastReceiver {
                 int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
                         WifiManager.WIFI_STATE_UNKNOWN);
 
-                Debug.log("wifiState: " + wifiState);
                 switch (wifiState) {
                     case WifiManager.WIFI_STATE_DISABLED:
                         fApp.stopWebServer();
                         break;
                     case WifiManager.WIFI_STATE_ENABLED:
-                        fApp.startWebServer();
+                        // fApp.startWebServer();
                         break;
+                }
+                break;
+
+            case WifiManager.NETWORK_STATE_CHANGED_ACTION:
+                Debug.log("**** WifiManager.NETWORK_STATE_CHANGED_ACTION ****");
+
+                Bundle bundle = intent.getExtras();
+                if (bundle != null) {
+                    for (String key : bundle.keySet()) {
+                        Object value = bundle.get(key);
+                        Debug.log(String.format("%s %s", key, String.valueOf(value)));
+                    }
+                }
+
+                NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                if (info != null) {
+                    if (info.isConnected()) {
+                        WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+
+                        String ssid = wifiInfo.getSSID();
+
+                        String ip = WebServer.formatIpAddress(wifiInfo.getIpAddress());
+
+                        Intent ipIntent = new Intent(App.LOCAL_ACTION_IP_CHANGED);
+                        ipIntent.putExtra("ip", ip);
+                        ipIntent.putExtra("ssid", ssid);
+                        context.sendBroadcast(ipIntent);
+
+                        fApp.startWebServer();
+                    }
+                } else {
+                    Debug.log("wifiInfo: null");
                 }
                 break;
         }

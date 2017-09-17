@@ -1,6 +1,9 @@
 package kg.delletenebre.callsassistant;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,6 +16,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.instabug.library.Instabug;
 
@@ -20,6 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private IntentFilter mBroadcastReceiverFilter;
+    private BroadcastReceiver mBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +41,36 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+
+
+        mBroadcastReceiverFilter = new IntentFilter();
+        mBroadcastReceiverFilter.addAction(App.LOCAL_ACTION_SERVER_START);
+        mBroadcastReceiverFilter.addAction(App.LOCAL_ACTION_SERVER_STOP);
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                switch (intent.getAction()) {
+                    case App.LOCAL_ACTION_SERVER_START:
+                    case App.LOCAL_ACTION_SERVER_STOP:
+                        updateIp();
+                        break;
+                }
+            }
+        };
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        App.getInstance().checkBluetoothEnabled(findViewById(R.id.root_layout));
+        registerReceiver(mBroadcastReceiver, mBroadcastReceiverFilter);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(mBroadcastReceiver);
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -42,7 +80,24 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
     }
 
-
+    public void updateIp() {
+        TextView tvIpAddress = findViewById(R.id.ip_address);
+        App app = App.getInstance();
+        if (tvIpAddress != null) {
+            WebServer webServer = app.getWebServer();
+            if (app.getPrefs().getString("connection_type").equals(App.CONNECTION_TYPE_WIFI)
+                    && webServer != null
+                    && !webServer.isStopped()) {
+                tvIpAddress.setVisibility(View.VISIBLE);
+                tvIpAddress.setText(String.format(
+                        getString(R.string.info_ip_address),
+                        webServer.getHost(),
+                        webServer.getPort()));
+            } else {
+                tvIpAddress.setVisibility(View.GONE);
+            }
+        }
+    }
 
     private class ViewPagerAdapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();

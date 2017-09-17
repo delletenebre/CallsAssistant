@@ -65,6 +65,7 @@
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+                <action android:name="android.net.wifi.STATE_CHANGE" />
             </intent-filter>
         </receiver>
 

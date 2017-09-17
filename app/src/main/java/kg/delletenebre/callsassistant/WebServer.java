@@ -3,8 +3,10 @@ package kg.delletenebre.callsassistant;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
-import android.widget.Toast;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.AsyncHttpGet;
@@ -14,10 +16,12 @@ import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -35,10 +39,12 @@ class WebServer {
     private int mLocalPort;
     private String mLocalHost;
     private String mServerAddress;
+    private WifiManager mWifiManager;
 
 
     WebServer(Context context) {
         mContext = context;
+        mWifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
     }
 
     void start(int port) {
@@ -49,7 +55,10 @@ class WebServer {
         mWebServer = new AsyncHttpServer();
         mWebServer.listen(mLocalPort);
 
-        Toast.makeText(mContext, mLocalHost + ":" + String.valueOf(mLocalPort), Toast.LENGTH_LONG).show();
+        Intent ipIntent = new Intent(App.LOCAL_ACTION_SERVER_START);
+        ipIntent.putExtra("ip", getIpAddress());
+        ipIntent.putExtra("port", mLocalPort);
+        mContext.sendBroadcast(ipIntent);
 
         mWebServer.get("/", new HttpServerRequestCallback() {
             @Override
@@ -132,6 +141,7 @@ class WebServer {
                         intent.putExtra("message", message);
                         intent.putExtra("buttons", buttons);
                         intent.putExtra("deviceAddress", deviceAddress);
+                        intent.putExtra("disabled", data.getString("disabled"));
 
                         mContext.sendBroadcast(intent);
                     }
@@ -146,7 +156,12 @@ class WebServer {
         if (mWebServer != null) {
             mWebServer.stop();
             mWebServer = null;
+            mContext.sendBroadcast(new Intent(App.LOCAL_ACTION_SERVER_STOP));
         }
+    }
+
+    public boolean isStopped() {
+        return mWebServer == null;
     }
 
 
@@ -184,6 +199,40 @@ class WebServer {
 
     String getDeviceAddress() {
         return getAPIUrl(mLocalHost, mLocalPort);
+    }
+
+    int getPort() {
+        return mLocalPort;
+    }
+
+    String getHost() {
+        return mLocalHost;
+    }
+
+    public String[] getWifiInfo() {
+        String[] result = new String[] {"", ""};
+        if (mWifiManager != null && mWifiManager.isWifiEnabled()) {
+            WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
+            if (wifiInfo != null) {
+                NetworkInfo.DetailedState state = WifiInfo.getDetailedStateOf(wifiInfo.getSupplicantState());
+                if (state == NetworkInfo.DetailedState.CONNECTED) {
+                    result[0] = formatIpAddress(wifiInfo.getIpAddress());
+                    result[1] = wifiInfo.getSSID();
+                }
+            }
+        }
+        return result;
+    }
+
+    public static String formatIpAddress(int intIp) {
+        byte[] iPAddress = BigInteger.valueOf(intIp).toByteArray();
+        ArrayUtils.reverse(iPAddress);
+        try {
+            return InetAddress.getByAddress(iPAddress).getHostAddress();
+        } catch (Exception e) {
+            // not interesting
+        }
+        return "";
     }
 
     private static String getIpAddress() {

@@ -135,6 +135,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void onBuildHeaders(List<Header> target) {
         loadHeadersFromResource(R.xml.pref_headers, target);
+
+        App.getInstance().checkBluetoothEnabled(getWindow().getDecorView());
     }
 
     /**
@@ -215,7 +217,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("message_sms_2"));
             bindPreferenceSummaryToValue(findPreference("message_sms_3"));
             bindPreferenceSummaryToValue(findPreference("message_gps"));
-
         }
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {

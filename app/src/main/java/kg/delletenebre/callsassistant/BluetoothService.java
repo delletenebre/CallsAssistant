@@ -470,8 +470,14 @@ public class BluetoothService {
         return mBluetoothAdapter != null;
     }
 
-    private boolean isEnabled() {
+    public boolean isEnabled() {
         return isAvailable() && mBluetoothAdapter.isEnabled();
+    }
+
+    public void enable() {
+        if (isAvailable() && !mBluetoothAdapter.isEnabled()) {
+            mBluetoothAdapter.enable();
+        }
     }
 }
 
