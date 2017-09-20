@@ -6,11 +6,23 @@
         android:entries="@array/pref_entries_connection_type"
         android:entryValues="@array/pref_values_connection_type" />
 
-    <EditTextPreference
-        android:key="web_server_port"
+    <EditTextPreference android:key="web_server_port"
         android:defaultValue="@string/pref_default_web_server_port"
         android:title="@string/pref_title_web_server_port"
         android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:maxLines="1" />
+
+    <SwitchPreference android:key="special_ssid_checkbox"
+        android:defaultValue="false"
+        android:title="@string/pref_title_special_ssid_checkbox"
+        android:summary="@string/pref_summary_special_ssid_checkbox" />
+
+    <EditTextPreference android:key="special_ssid"
+        android:dependency="special_ssid_checkbox"
+        android:defaultValue="@string/pref_default_special_ssid"
+        android:title="@string/pref_title_special_ssid"
+        android:inputType="text"
         android:selectAllOnFocus="true"
         android:maxLines="1" />
 

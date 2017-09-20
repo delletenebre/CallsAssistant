@@ -64,6 +64,10 @@
 
     <string name="pref_title_connection_type">Тип соединения</string>
     <string name="pref_title_web_server_port">Порт</string>
+    <string name="pref_title_special_ssid_checkbox">Указать SSID</string>
+    <string name="pref_summary_special_ssid_checkbox">Если включено, уведомления будут работать только при подключении к указанной WiFi сети\n
+        SSID - это название Вашей WiFi сети\n
+        Можно указать несколько сетей через запятую</string>
     <string name="pref_title_web_server_host">IP \"Планшета\"</string>
 
     <string name="pref_title_bluetooth_device">Bluetooth-устройство</string>

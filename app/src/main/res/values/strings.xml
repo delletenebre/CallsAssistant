@@ -84,6 +84,13 @@
     </string-array>
     <string name="pref_title_web_server_port">Port</string>
     <string name="pref_default_web_server_port" translatable="false">8877</string>
+    <string name="pref_title_special_ssid_checkbox">Specify SSID</string>
+    <string name="pref_summary_special_ssid_checkbox">If enabled, notifications will only work when connected to the specified WiFi network\n
+         SSID is the name of your WiFi network\n
+         You can specify multiple networks separated by commas</string>
+    <string name="pref_title_special_ssid" translatable="false">SSID</string>
+    <string name="pref_default_special_ssid" translatable="false"></string>
+
     <string name="pref_title_web_server_host">\"Tablet\'s\" IP</string>
     <string name="pref_default_web_server_host" translatable="false">192.168.43.250</string>
     <bool name="pref_default_device_server" translatable="false">false</bool>

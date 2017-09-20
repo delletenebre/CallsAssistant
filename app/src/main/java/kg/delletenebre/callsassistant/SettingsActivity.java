@@ -162,13 +162,19 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             final Preference webServerPort = findPreference("web_server_port");
             webServerPort.setEnabled(connectionType.getValue().equals("http"));
 
+            final Preference ssidCheckbox = findPreference("special_ssid_checkbox");
+            ssidCheckbox.setEnabled(connectionType.getValue().equals("http"));
+
             bindPreferenceSummaryToValue(connectionType);
             bindPreferenceSummaryToValue(webServerPort);
+            bindPreferenceSummaryToValue(findPreference("special_ssid"));
 
             connectionType.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 public boolean onPreferenceChange(Preference preference, Object value) {
                     String stringValue = value.toString();
-                    webServerPort.setEnabled(stringValue.equals("http"));
+                    boolean isTypeHttp = stringValue.equals("http");
+                    webServerPort.setEnabled(isTypeHttp);
+                    ssidCheckbox.setEnabled(isTypeHttp);
                     ListPreference listPreference = (ListPreference) preference;
                     int index = listPreference.findIndexOfValue(stringValue);
                     preference.setSummary(
