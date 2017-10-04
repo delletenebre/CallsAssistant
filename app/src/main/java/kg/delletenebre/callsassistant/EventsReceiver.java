@@ -83,6 +83,7 @@ public class EventsReceiver extends BroadcastReceiver {
                         // Ring but no pickup - a miss
                         infoState = "missed";
                     } else if (!sCallIsIncoming) {
+                        infoPhoneNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
                         infoType = "outgoing";
                     }
                 }

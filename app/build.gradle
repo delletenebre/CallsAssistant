@@ -7,7 +7,7 @@ android {
         applicationId "kg.delletenebre.callsassistant"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 13
+        versionCode 14
         versionName "1.4"
         vectorDrawables.useSupportLibrary = true
     }
