@@ -19,7 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.instabug.library.Instabug;
+import com.crashlytics.android.Crashlytics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,14 +49,19 @@ public class MainActivity extends AppCompatActivity {
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                switch (intent.getAction()) {
-                    case App.LOCAL_ACTION_SERVER_START:
-                    case App.LOCAL_ACTION_SERVER_STOP:
-                        updateIp();
-                        break;
+                String action = intent.getAction();
+                if (action != null) {
+                    switch (action) {
+                        case App.LOCAL_ACTION_SERVER_START:
+                        case App.LOCAL_ACTION_SERVER_STOP:
+                            updateIp();
+                            break;
+                    }
                 }
             }
         };
+
+        App.getInstance().startWebServer();
     }
 
     @Override
@@ -145,7 +150,12 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, SettingsActivity.class));
                 break;
             case R.id.report_crash:
-                Instabug.invoke();
+                try {
+                    throw new RuntimeException();
+                } catch (Exception e) {
+                    Crashlytics.setString("UserReport", "Failed sending reply to debugger: Broken pipe");
+                    Crashlytics.logException(e);
+                }
                 break;
         }
 

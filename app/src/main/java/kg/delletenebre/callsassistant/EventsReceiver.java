@@ -32,6 +32,9 @@ public class EventsReceiver extends BroadcastReceiver {
         final App fApp = App.getInstance();
 
         String action = intent.getAction();
+        if (action == null) {
+            return;
+        }
 
         String infoEvent;
         String infoType = "";
@@ -102,26 +105,32 @@ public class EventsReceiver extends BroadcastReceiver {
                 infoType = "incoming";
                 Map<String, String> contact = new HashMap<>();
                 if (Build.VERSION.SDK_INT >= 19) {
+                    StringBuilder infoMessageBuilder = new StringBuilder();
                     for (SmsMessage smsMessage : Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
                         if (smsMessage == null) {
                             Debug.error("SMS is null");
                             break;
                         }
                         infoPhoneNumber = smsMessage.getDisplayOriginatingAddress();
-                        infoMessage += smsMessage.getDisplayMessageBody();
+                        infoMessageBuilder.append(smsMessage.getDisplayMessageBody());
                     }
+                    infoMessage = infoMessageBuilder.toString();
                 } else {
                     Bundle extras = intent.getExtras();
-                    Object[] smsData = (Object[]) extras.get("pdus");
-                    if (smsData != null) {
-                        for (Object pdu : smsData) {
-                            SmsMessage smsMessage = SmsMessage.createFromPdu((byte[]) pdu);
-                            if (smsMessage == null) {
-                                Debug.error("SMS is null");
-                                break;
+                    if (extras != null) {
+                        Object[] smsData = (Object[]) extras.get("pdus");
+                        if (smsData != null) {
+                            StringBuilder infoMessageBuilder = new StringBuilder();
+                            for (Object pdu : smsData) {
+                                SmsMessage smsMessage = SmsMessage.createFromPdu((byte[]) pdu);
+                                if (smsMessage == null) {
+                                    Debug.error("SMS is null");
+                                    break;
+                                }
+                                infoPhoneNumber = smsMessage.getDisplayOriginatingAddress();
+                                infoMessageBuilder.append(smsMessage.getDisplayMessageBody());
                             }
-                            infoPhoneNumber = smsMessage.getDisplayOriginatingAddress();
-                            infoMessage += smsMessage.getDisplayMessageBody();
+                            infoMessage = infoMessageBuilder.toString();
                         }
                     }
                 }
@@ -156,7 +165,7 @@ public class EventsReceiver extends BroadcastReceiver {
                         fApp.stopWebServer();
                         break;
                     case WifiManager.WIFI_STATE_ENABLED:
-                        // fApp.startWebServer();
+                        fApp.startWebServer();
                         break;
                 }
                 break;
@@ -175,19 +184,19 @@ public class EventsReceiver extends BroadcastReceiver {
                 NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                 if (info != null) {
                     if (info.isConnected()) {
-                        WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-
-                        String ssid = wifiInfo.getSSID();
-
-                        String ip = WebServer.formatIpAddress(wifiInfo.getIpAddress());
-
-                        Intent ipIntent = new Intent(App.LOCAL_ACTION_IP_CHANGED);
-                        ipIntent.putExtra("ip", ip);
-                        ipIntent.putExtra("ssid", ssid);
-                        context.sendBroadcast(ipIntent);
-
+                        WifiManager wifiManager =
+                                (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                        if (wifiManager != null) {
+                            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+                            String ssid = wifiInfo.getSSID();
+                            String ip = WebServer.formatIpAddress(wifiInfo.getIpAddress());
+                            Intent ipIntent = new Intent(App.LOCAL_ACTION_IP_CHANGED);
+                            ipIntent.putExtra("ip", ip);
+                            ipIntent.putExtra("ssid", ssid);
+                            context.sendBroadcast(ipIntent);
+                        }
                         fApp.startWebServer();
+
                     }
                 } else {
                     Debug.log("wifiInfo: null");

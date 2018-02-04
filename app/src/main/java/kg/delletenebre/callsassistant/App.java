@@ -28,8 +28,7 @@ import android.util.Base64;
 import android.view.View;
 
 import com.android.internal.telephony.ITelephony;
-import com.instabug.library.Instabug;
-import com.instabug.library.invocation.InstabugInvocationEvent;
+import com.crashlytics.android.Crashlytics;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,6 +42,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import io.fabric.sdk.android.Fabric;
 import kg.delletenebre.callsassistant.utils.Debug;
 import kg.delletenebre.callsassistant.utils.Prefs;
 
@@ -80,12 +80,10 @@ public class App extends Application {
         super.onCreate();
         sSelf = this;
 
-        new Instabug.Builder(this, "23b86d379605928939e2f5f87947cc5d")
-                .setInvocationEvent(InstabugInvocationEvent.SHAKE)
-                .build();
-
         setTheme(R.style.AppTheme);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+
+        Fabric.with(this, new Crashlytics());
 
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mPrefs = new Prefs(this);
@@ -534,13 +532,13 @@ public class App extends Application {
             List<String> providers = mLocationManager.getProviders(true);
             for (String provider : providers) {
                 //noinspection MissingPermission
-                Location l = mLocationManager.getLastKnownLocation(provider);
-                if (l == null) {
+                Location location = mLocationManager.getLastKnownLocation(provider);
+                if (location == null) {
                     continue;
                 }
-                if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                if (bestLocation == null || location.getAccuracy() < bestLocation.getAccuracy()) {
                     // Found best last known location: %s", l);
-                    bestLocation = l;
+                    bestLocation = location;
                 }
             }
         }
@@ -569,12 +567,15 @@ public class App extends Application {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     private void endCallAidl(Context context) throws Exception {
-        TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        Class c = Class.forName(tm.getClass().getName());
-        Method m = c.getDeclaredMethod("getITelephony");
-        m.setAccessible(true);
-        ITelephony telephonyService = (ITelephony) m.invoke(tm);
-        telephonyService.endCall();
+        TelephonyManager telephonyManager =
+                (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        if (telephonyManager != null) {
+            Class class_ = Class.forName(telephonyManager.getClass().getName());
+            Method method_ = class_.getDeclaredMethod("getITelephony");
+            method_.setAccessible(true);
+            ITelephony telephonyService = (ITelephony) method_.invoke(telephonyManager);
+            telephonyService.endCall();
+        }
     }
     public void endCall() {
         if (PermissionsActivity.testPermission(Manifest.permission.CALL_PHONE)) {
@@ -593,6 +594,10 @@ public class App extends Application {
 
     public void startWebServer() {
         if (mPrefs.getString("connection_type").equals(CONNECTION_TYPE_WIFI)) {
+            if (!mWebServer.isStopped()) {
+                stopWebServer();
+            }
+
             mWebServer.start(mPrefs.getInt("web_server_port"));
             mWebServer.setServerAddress(mPrefs.getString("web_server_host"),
                     mPrefs.getInt("web_server_port"));
